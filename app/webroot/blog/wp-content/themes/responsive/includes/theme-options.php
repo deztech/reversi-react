@@ -122,8 +122,6 @@ function responsive_theme_options_do_page() {
 		<div class="updated fade"><p><strong><?php _e('Options Saved', 'responsive'); ?></strong></p></div>
 		<?php endif; ?>
         
-            <?php responsive_theme_options(); // Theme Options Hook ?>
-
         <form method="post" action="options.php">
             <?php settings_fields('responsive_options'); ?>
             <?php $options = get_option('responsive_theme_options'); ?>

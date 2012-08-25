@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Responsive Theme\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-04-25 13:42:58 UTC\n"
-"PO-Revision-Date: 2012-07-01 21:02+0100\n"
-"Last-Translator: grapplerulrich <grapplerulrich@gmail.com>\n"
+"PO-Revision-Date: 2012-08-06 21:22+0100\n"
+"Last-Translator: Ulrich Pogson <grapplerulrich@gmail.com>\n"
 "Language-Team: Portuguese, Brazil\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -270,7 +270,6 @@ msgstr "Este post &#233; protegido por senha. Digite a senha para ver todos os c
 msgid "&#8249; Older comments"
 msgstr "&#8249; Coment&#225;rios mais antigos"
 
-#. Don't translate the zero value there is no point
 #: comments.php
 msgid "One comment on &ldquo;%2$s&rdquo;"
 msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
@@ -510,6 +509,38 @@ msgstr "P&#225;gina"
 #: includes/functions.php
 msgid "Untitled"
 msgstr "Sem T&#237;tulo"
+
+#: includes/functions.php
+msgid "http://themeid.com/support/"
+msgstr "http://themeid.com/support/"
+
+#: includes/functions.php
+msgid "Theme Support"
+msgstr "Suporte"
+
+#: includes/functions.php
+msgid "http://themeid.com/themes/"
+msgstr "http://themeid.com/themes/"
+
+#: includes/functions.php
+msgid "More Themes"
+msgstr "Mais Temas"
+
+#: includes/functions.php
+msgid "http://themeid.com/showcase/"
+msgstr "http://themeid.com/showcase/"
+
+#: includes/functions.php
+msgid "Showcase"
+msgstr "Vitrine"
+
+#: includes/functions.php
+msgid "http://themeid.com/donate/"
+msgstr "http://themeid.com/donate/"
+
+#: includes/functions.php
+msgid "Donate Now"
+msgstr "Doar Agora"
 
 #: includes/functions.php
 msgid "Main Sidebar"

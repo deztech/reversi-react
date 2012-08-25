@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Responsive Theme\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-04-25 13:42:58 UTC\n"
-"PO-Revision-Date: 2012-07-08 17:08+0100\n"
-"Last-Translator: grapplerulrich <grapplerulrich@gmail.com>\n"
+"PO-Revision-Date: 2012-08-06 21:22+0100\n"
+"Last-Translator: Ulrich Pogson <grapplerulrich@gmail.com>\n"
 "Language-Team: Dutch, Netherlands\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -251,6 +251,14 @@ msgstr "&#8249; Oudere berichten"
 msgid "Newer posts &#8250;"
 msgstr "Nieuwere berichten &#8250;"
 
+#: page.php
+#: landing-page.php
+#: index.php
+#: full-width-page.php
+#: content-sidebar-page.php
+#: content-sidebar-half-page.php
+#: blog.php
+#: image.php
 msgid "Read more &#8250;"
 msgstr "Lees meer &#8250;"
 
@@ -262,7 +270,6 @@ msgstr "Dit bericht is beschermd met een paswoord. Geef het paswoord om reacties
 msgid "&#8249; Older comments"
 msgstr "&#8249; Oudere reacties"
 
-#. Don't translate the zero value there is no point
 #: comments.php
 msgid "One comment on &ldquo;%2$s&rdquo;"
 msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
@@ -293,6 +300,7 @@ msgstr "E-mail"
 msgid "Website"
 msgstr "Website"
 
+#: footer.php
 msgid "&copy;"
 msgstr "&copy;"
 
@@ -316,6 +324,7 @@ msgstr "Responsive Theme"
 msgid "powered by"
 msgstr "ondersteund door"
 
+#: footer.php
 msgid "http://wordpress.org/"
 msgstr "http://nl.wordpress.org/"
 
@@ -327,9 +336,11 @@ msgstr "WordPress"
 msgid "Hello, World!"
 msgstr "Hallo, Wereld!"
 
+#: home.php
 msgid "Your H2 subheadline here"
 msgstr "Je H2 subkoptekst hier"
 
+#: home.php
 msgid "Your title, subtitle and this very content is editable from Theme Option. Call to Action button and its destination link as well. Image on your right can be an image or even YouTube video if you like."
 msgstr "Je titel, subtitel en deze inhoud zijn te bewerken vanuit Thema Keuze. Evenals de Actie knop en de bestemmingslink. Afbeelding aan de rechterkant kan een afbeelding zijn of zelfs een Youtube video als je dat wil."
 
@@ -403,6 +414,12 @@ msgstr "Sluiter"
 msgid "Camera:"
 msgstr "Camera"
 
+#: sidebar.php
+#: sidebar-right.php
+#: sidebar-right-half.php
+#: sidebar-left.php
+#: sidebar-left-half.php
+#: sidebar-half-left.php
 msgid "In Archive"
 msgstr "In het Archief"
 
@@ -465,18 +482,23 @@ msgstr "Sub-Header Menu"
 msgid "Footer Menu"
 msgstr "Voettekst Menu"
 
+#: includes/functions.php
 msgid "Archive for "
 msgstr "Archief voor "
 
+#: includes/functions.php
 msgid "Search results for "
 msgstr "Zoekresultaten voor "
 
+#: includes/functions.php
 msgid "Posts tagged "
 msgstr "Berichten getagd met "
 
+#: includes/functions.php
 msgid "All posts by "
 msgstr "Alle berichten van "
 
+#: includes/functions.php
 msgid "Error 404 "
 msgstr "Fout 404 "
 
@@ -487,6 +509,38 @@ msgstr "Pagina"
 #: includes/functions.php
 msgid "Untitled"
 msgstr "Zonder Titel"
+
+#: includes/functions.php
+msgid "http://themeid.com/support/"
+msgstr "http://themeid.com/support/"
+
+#: includes/functions.php
+msgid "Theme Support"
+msgstr "Thema Hulp"
+
+#: includes/functions.php
+msgid "http://themeid.com/themes/"
+msgstr "http://themeid.com/themes/"
+
+#: includes/functions.php
+msgid "More Themes"
+msgstr "Meer Thema's"
+
+#: includes/functions.php
+msgid "http://themeid.com/showcase/"
+msgstr "http://themeid.com/showcase/"
+
+#: includes/functions.php
+msgid "Showcase"
+msgstr "Etalage"
+
+#: includes/functions.php
+msgid "http://themeid.com/donate/"
+msgstr "http://themeid.com/donate/"
+
+#: includes/functions.php
+msgid "Donate Now"
+msgstr "Doneer Nu"
 
 #: includes/functions.php
 msgid "Main Sidebar"
@@ -500,6 +554,7 @@ msgstr "Gebied Een - sidebar.php"
 msgid "Right Sidebar"
 msgstr "Rechter Sidebar"
 
+#: includes/functions.php
 msgid "Area Two - sidebar-right.php"
 msgstr "Gebied Twee - sidebar-right.php"
 
@@ -715,6 +770,7 @@ msgstr "Vul je Facebook URL in"
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
+#: includes/theme-options.php
 msgid "Enter your LinkedIn URL"
 msgstr "Vul je LinkedIn URL in"
 
@@ -794,6 +850,7 @@ msgstr "Vul je foursquare URL in"
 msgid "Custom CSS Styles"
 msgstr "Custom CSS Styles"
 
+#: includes/theme-options.php
 msgid "https://developer.mozilla.org/en/CSS"
 msgstr "https://developer.mozilla.org/nl/CSS"
 

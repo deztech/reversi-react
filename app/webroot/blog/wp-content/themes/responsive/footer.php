@@ -12,7 +12,7 @@ if ( !defined('ABSPATH')) exit;
  * @author         Emil Uzelac 
  * @copyright      2003 - 2012 ThemeID
  * @license        license.txt
- * @version        Release: 1.1
+ * @version        Release: 1.2
  * @filesource     wp-content/themes/responsive/footer.php
  * @link           http://codex.wordpress.org/Theme_Development#Footer_.28footer.php.29
  * @since          available since Release 1.0
@@ -101,6 +101,7 @@ if ( !defined('ABSPATH')) exit;
          </div><!-- end of col-380 fit -->
          
          </div><!-- end of col-940 -->
+         <?php get_sidebar('colophon'); ?>
                 
         <div class="grid col-300 copyright">
             <?php esc_attr_e('&copy;', 'responsive'); ?> <?php _e(date('Y')); ?><a href="<?php echo home_url('/') ?>" title="<?php echo esc_attr(get_bloginfo('name', 'display')); ?>">

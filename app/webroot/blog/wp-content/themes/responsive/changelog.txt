@@ -8,6 +8,38 @@ Changelog Legend:
 [x] = Deleted
 [!] = Bugs
 
+(08/21/2012) - IE7 Bug Fix
+[!] widget clearfix
+
+(08/19/2012) - Maintenance and Improvements - Version 1.7.5
+[+] Shortcode support for home and featured areas
+[+] Colophon widget (on-demand)
+[x] style.css
+    - Table blocks for 480px
+	- Margins for old widgets
+[*] style.css
+    - Description
+[x] Old action hook
+[*] Modernizr 2.6.1 (update)
+
+
+(08/06/2012) - Improvements - Version 1.7.3/4
+[+] WooCommerce Compatible
+[+] New Languages
+    - Japanese
+	- Chinese (Taiwan)
+[*] responsive.pot
+[*] style.css for WooCommerce Compatibility 
+
+----
+
+(07/19/2012) - Improvements - Version 1.7.2
+[+] Multilingual Ready (wmpl.org)
+[+] style.css
+    - b,i,iframe,embed and object
+
+----
+
 (07/09/2012) - Improvements and Maintenance - Version 1.7.0/1
 [+] New Languages
     - Chinese

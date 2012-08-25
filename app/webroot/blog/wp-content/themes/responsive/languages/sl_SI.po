@@ -3,9 +3,9 @@ msgstr ""
 "Project-Id-Version: Responsive Theme\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-04-25 13:42:58 UTC\n"
-"PO-Revision-Date: 2012-07-01 21:51+0100\n"
-"Last-Translator: grapplerulrich <grapplerulrich@gmail.com>\n"
-"Language-Team: slovène, Slovénie\n"
+"PO-Revision-Date: 2012-08-06 21:22+0100\n"
+"Last-Translator: Ulrich Pogson <grapplerulrich@gmail.com>\n"
+"Language-Team: Slovenian, Slovenia\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -270,7 +270,6 @@ msgstr "Ta objava je zaščitena z geslom. Vnesi geslo ze pregled komentarjev."
 msgid "&#8249; Older comments"
 msgstr "&#8249; Starejši komentarji"
 
-#. Don't translate the zero value there is no point
 #: comments.php
 msgid "One comment on &ldquo;%2$s&rdquo;"
 msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
@@ -512,6 +511,38 @@ msgstr "Stran"
 #: includes/functions.php
 msgid "Untitled"
 msgstr "Brez naslova"
+
+#: includes/functions.php
+msgid "http://themeid.com/support/"
+msgstr "http://themeid.com/podpora/"
+
+#: includes/functions.php
+msgid "Theme Support"
+msgstr "Podpora"
+
+#: includes/functions.php
+msgid "http://themeid.com/themes/"
+msgstr "http://themeid.com/teme/"
+
+#: includes/functions.php
+msgid "More Themes"
+msgstr "Več tem"
+
+#: includes/functions.php
+msgid "http://themeid.com/showcase/"
+msgstr "http://themeid.com/pregled/"
+
+#: includes/functions.php
+msgid "Showcase"
+msgstr "Pregled"
+
+#: includes/functions.php
+msgid "http://themeid.com/donate/"
+msgstr "http://themeid.com/doniraj/"
+
+#: includes/functions.php
+msgid "Donate Now"
+msgstr "Doniraj"
 
 #: includes/functions.php
 msgid "Main Sidebar"

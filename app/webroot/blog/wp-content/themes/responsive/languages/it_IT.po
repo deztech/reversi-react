@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Responsive Theme\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-04-25 13:42:58 UTC\n"
-"PO-Revision-Date: 2012-07-01 21:01+0100\n"
-"Last-Translator: grapplerulrich <grapplerulrich@gmail.com>\n"
+"PO-Revision-Date: 2012-08-06 21:21+0100\n"
+"Last-Translator: Ulrich Pogson <grapplerulrich@gmail.com>\n"
 "Language-Team: Italian, Italy\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -270,7 +270,6 @@ msgstr "Questo articolo &#232; protetto da passwod. Inserisci la password per ve
 msgid "&#8249; Older comments"
 msgstr "&#8249; Commenti pi&#249; vecchi"
 
-#. Don't translate the zero value there is no point
 #: comments.php
 msgid "One comment on &ldquo;%2$s&rdquo;"
 msgid_plural "%1$s comments on &ldquo;%2$s&rdquo;"
@@ -343,7 +342,7 @@ msgstr "Sottotitolo H2 qui"
 
 #: home.php
 msgid "Your title, subtitle and this very content is editable from Theme Option. Call to Action button and its destination link as well. Image on your right can be an image or even YouTube video if you like."
-msgstr "Il tuo titolo, sottotitolo e il contenuto sono modificabili da Opzioni Tema. Ugualmente il bottone Richiama un&#39;Azione e il suo link di destinazione. L&#39;immagine alla tua destra pu&#242; essere un&#39;immagine o un link youtube."
+msgstr "Il tuo titolo, sottotitolo e il contenuto sono modificabili da Opzioni Tema. Il bottone Richiama un&#39;Azione e la sua destinazione possono essere collegati allo stesso modo. L&#39;immagine alla tua destra pu&#242; essere un&#39;immagine o un video YouTube."
 
 #: home.php
 msgid "Call to Action"
@@ -512,6 +511,38 @@ msgid "Untitled"
 msgstr "Senza Nome"
 
 #: includes/functions.php
+msgid "http://themeid.com/support/"
+msgstr "http://themeid.com/support/"
+
+#: includes/functions.php
+msgid "Theme Support"
+msgstr "Supporto al Tema"
+
+#: includes/functions.php
+msgid "http://themeid.com/themes/"
+msgstr "http://themeid.com/themes/"
+
+#: includes/functions.php
+msgid "More Themes"
+msgstr "Altri Temi"
+
+#: includes/functions.php
+msgid "http://themeid.com/showcase/"
+msgstr "http://themeid.com/showcase/"
+
+#: includes/functions.php
+msgid "Showcase"
+msgstr "Esempi"
+
+#: includes/functions.php
+msgid "http://themeid.com/donate/"
+msgstr "http://themeid.com/donate/"
+
+#: includes/functions.php
+msgid "Donate Now"
+msgstr "Fai una Donazione Adesso"
+
+#: includes/functions.php
 msgid "Main Sidebar"
 msgstr "Barra laterale principale"
 
@@ -669,7 +700,7 @@ msgstr "http://themeid.com/forum/topic/510/theme-options-featured-content/"
 
 #: includes/theme-options.php
 msgid "See Docs"
-msgstr ""
+msgstr "Vedi Documentazione"
 
 #: includes/theme-options.php
 msgid "Paste your video or image source"
@@ -709,7 +740,7 @@ msgstr "Tracker Statistiche Sito"
 
 #: includes/theme-options.php
 msgid "Leave blank if plugin handles your webmaster tools"
-msgstr ""
+msgstr "Lascia in bianco se utilizzi già dei plugin per gestire gli Strumenti del Webmaster"
 
 #: includes/theme-options.php
 msgid "Google Analytics, StatCounter, any other or all of them."
@@ -817,7 +848,7 @@ msgstr "Inserisci il tuo indirizzo foursquare"
 
 #: includes/theme-options.php
 msgid "Custom CSS Styles"
-msgstr ""
+msgstr "Stili CSS personalizzati"
 
 #: includes/theme-options.php
 msgid "https://developer.mozilla.org/en/CSS"
@@ -825,9 +856,9 @@ msgstr "https://developer.mozilla.org/it/CSS"
 
 #: includes/theme-options.php
 msgid "CSS Tutorial"
-msgstr ""
+msgstr "Guida ai CSS"
 
 #: includes/theme-options.php
 msgid "Enter your custom CSS styles."
-msgstr ""
+msgstr "Inserisci il tuo stile CSS personalizzato"
 

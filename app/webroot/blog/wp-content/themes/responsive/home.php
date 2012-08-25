@@ -57,9 +57,9 @@ if ( !defined('ABSPATH')) exit;
             
             <?php $options = get_option('responsive_theme_options');
 			// First let's check if content is in place
-			    if ($options['home_content_area']) {
+			    if (!empty($options['home_content_area'])) {
                     echo '<p>'; 
-				    echo $options['home_content_area'];
+					echo do_shortcode($options['home_content_area']);
 				    echo '</p>'; 
 			// If not let's show dummy content for demo purposes
 			      } else { 
@@ -97,7 +97,7 @@ if ( !defined('ABSPATH')) exit;
             <?php $options = get_option('responsive_theme_options');
 			// First let's check if image was set
 			    if (!empty($options['featured_content'])) {
-					echo $options['featured_content'];
+					echo do_shortcode($options['featured_content']);
 		    // If not display dummy image for preview purposes
 			      } else {             
                     echo '<img class="aligncenter" src="'.get_stylesheet_directory_uri().'/images/featured-image.png" width="440" height="300" alt="" />'; 

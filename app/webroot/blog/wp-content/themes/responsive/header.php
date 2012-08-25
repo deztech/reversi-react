@@ -12,7 +12,7 @@ if ( !defined('ABSPATH')) exit;
  * @author         Emil Uzelac 
  * @copyright      2003 - 2012 ThemeID
  * @license        license.txt
- * @version        Release: 1.0
+ * @version        Release: 1.2
  * @filesource     wp-content/themes/responsive/header.php
  * @link           http://codex.wordpress.org/Theme_Development#Document_Head_.28header.php.29
  * @since          available since Release 1.0
@@ -34,7 +34,7 @@ if ( !defined('ABSPATH')) exit;
 <link rel="profile" href="http://gmpg.org/xfn/11" />
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 
-<?php wp_enqueue_style('responsive-style', get_stylesheet_uri(), false, '1.5.9');?>
+<?php wp_enqueue_style('responsive-style', get_stylesheet_uri(), false, '1.7.5');?>
 
 <?php wp_head(); ?>
 </head>
