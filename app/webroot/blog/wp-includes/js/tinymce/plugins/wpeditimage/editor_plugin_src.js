@@ -142,16 +142,13 @@
 				var id, cls, w, cap, div_cls, img, trim = tinymce.trim;
 
 				id = b.match(/id=['"]([^'"]*)['"] ?/);
-				if ( id )
-					b = b.replace(id[0], '');
+				b = b.replace(id[0], '');
 
 				cls = b.match(/align=['"]([^'"]*)['"] ?/);
-				if ( cls )
-					b = b.replace(cls[0], '');
+				b = b.replace(cls[0], '');
 
 				w = b.match(/width=['"]([0-9]*)['"] ?/);
-				if ( w )
-					b = b.replace(w[0], '');
+				b = b.replace(w[0], '');
 
 				c = trim(c);
 				img = c.match(/((?:<a [^>]+>)?<img [^>]+>(?:<\/a>)?)([\s\S]*)/i);

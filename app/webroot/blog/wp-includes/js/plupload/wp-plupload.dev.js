@@ -73,10 +73,6 @@ if ( typeof wp === 'undefined' )
 			this.plupload[ elements[ key ] ] = this[ key ].prop('id');
 		}
 
-		// If the uploader has neither a browse button nor a dropzone, bail.
-		if ( ! ( this.browser && this.browser.length ) && ! ( this.dropzone && this.dropzone.length ) )
-			return;
-
 		this.uploader = new plupload.Uploader( this.plupload );
 		delete this.plupload;
 
@@ -117,13 +113,7 @@ if ( typeof wp === 'undefined' )
 			});
 		}( this.dropzone, this.supports.dragdrop ));
 
-		if ( this.browser ) {
-			this.browser.on( 'mouseenter', this.refresh );
-		} else {
-			this.uploader.disableBrowse( true );
-			// If HTML5 mode, hide the auto-created file container.
-			$('#' + this.uploader.id + '_html5_container').hide();
-		}
+		this.browser.on( 'mouseenter', this.refresh );
 
 		this.uploader.bind( 'UploadProgress', this.progress );
 
