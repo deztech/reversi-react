@@ -1629,12 +1629,11 @@ add_action( 'admin_enqueue_scripts', '_wp_customize_loader_settings' );
  * @since 3.4.0
  *
  * @param string $stylesheet Optional. Theme to customize. Defaults to current theme.
- * 	The theme's stylesheet will be urlencoded if necessary.
  */
 function wp_customize_url( $stylesheet = null ) {
 	$url = admin_url( 'customize.php' );
 	if ( $stylesheet )
-		$url .= '?theme=' . urlencode( $stylesheet );
+		$url .= '?theme=' . $stylesheet;
 	return esc_url( $url );
 }
 

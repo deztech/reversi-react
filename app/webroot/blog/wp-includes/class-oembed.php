@@ -213,14 +213,8 @@ class WP_oEmbed {
 			$errors = libxml_use_internal_errors( 'true' );
 			$data = simplexml_load_string( $response_body );
 			libxml_use_internal_errors( $errors );
-			if ( ! is_object( $data ) )
-				return false;
-
-			$return = new stdClass;
-			foreach ( $data as $key => $value )
-				$return->$key = (string) $value;
-
-			return $return;
+			if ( is_object( $data ) )
+				return $data;
 		}
 		return false;
 	}
