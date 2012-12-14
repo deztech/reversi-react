@@ -393,6 +393,13 @@ jQuery(document).ready(function($) {
 	};
 
 	var methods = {
+		testForData: function(gallery) {
+			gallery = $( gallery ); // make sure we have it as a jQuery object.
+			if ( ! gallery.length || undefined == gallery.data( 'carousel-extra' ) )
+				return false;
+			return true;
+		},
+
 		open: function(options) {
 			var settings = {
 				'items_selector' : ".gallery-item [data-attachment-id], .tiled-gallery-item [data-attachment-id]",
@@ -702,6 +709,7 @@ jQuery(document).ready(function($) {
 		},
 
 		texturize : function(text) {
+				text = new String(text); // make sure we get a string. Title "1" came in as int 1, for example, which did not support .replace().
 				text = text.replace(/'/g, '&#8217;').replace(/&#039;/g, '&#8217;').replace(/[\u2019]/g, '&#8217;');
 				text = text.replace(/"/g, '&#8221;').replace(/&#034;/g, '&#8221;').replace(/&quot;/g, '&#8221;').replace(/[\u201D]/g, '&#8221;');
 				text = text.replace(/([\w]+)=&#[\d]+;(.+?)&#[\d]+;/g, '$1="$2"'); // untexturize allowed HTML tags params double-quotes
@@ -715,7 +723,7 @@ jQuery(document).ready(function($) {
 			// Calculate the new src.
 			items.each(function(i){
 				var src_item  = $(this),
-					orig_size = src_item.data('orig-size') || 0,
+					orig_size = src_item.data('orig-size') || '',
 					max       = gallery.jp_carousel('slideDimensions'),
 					parts     = orig_size.split(',');
 					orig_size = {width: parseInt(parts[0], 10), height: parseInt(parts[1], 10)},
@@ -748,49 +756,49 @@ jQuery(document).ready(function($) {
 					attachment_id   = src_item.data('attachment-id') || 0,
 					comments_opened = src_item.data('comments-opened') || 0,
 					image_meta      = src_item.data('image-meta') || {},
-					orig_size       = src_item.data('orig-size') || 0,
-					title           = src_item.attr('title') || '',
+					orig_size       = src_item.data('orig-size') || '',
+					title           = src_item.data('image-title') || '',
 					description     = src_item.data('image-description') || '',
 					caption         = src_item.parents('dl').find('dd.gallery-caption').html() || '',
-					src				= src_item.data('gallery-src') || '',
+					src		= src_item.data('gallery-src') || '',
 					medium_file     = src_item.data('medium-file') || '',
-					large_file      = src_item.data('large-file') || '';
+					large_file      = src_item.data('large-file') || '',
+					orig_file	= src_item.data('orig-file') || '';
 
 				var tiledCaption = src_item.parents('div.tiled-gallery-item').find('div.tiled-gallery-caption').html();
 				if ( tiledCaption )
 					caption = tiledCaption;
 
-				if ( !attachment_id || !orig_size )
-					return false; // break the loop if we are missing the data-* attributes
-				
-				title       = gallery.jp_carousel('texturize', title);
-				description = gallery.jp_carousel('texturize', description);
-				caption     = gallery.jp_carousel('texturize', caption);
-				
-				var slide = $('<div class="jp-carousel-slide"></div>')
-						.hide()
-						.css({
-							'position' : 'fixed',
-							'left'     : i < start_index ? -1000 : gallery.width()
-						})
-						.append($('<img>'))
-						.appendTo(gallery)
-						.data('src', src )
-						.data('title', title)
-						.data('desc', description)
-						.data('caption', caption)
-						.data('attachment-id', attachment_id)
-						.data('permalink', src_item.parents('a').attr('href'))
-						.data('orig-size', orig_size)
-						.data('comments-opened', comments_opened)
-						.data('image-meta', image_meta)
-						.data('medium-file', medium_file)
-						.data('large-file', large_file)
-						.jp_carousel('fitSlide', false);
+				if ( attachment_id && orig_size.length ) {
+					title       = gallery.jp_carousel('texturize', title);
+					description = gallery.jp_carousel('texturize', description);
+					caption     = gallery.jp_carousel('texturize', caption);
+					
+					var slide = $('<div class="jp-carousel-slide"></div>')
+							.hide()
+							.css({
+								'position' : 'fixed',
+								'left'     : i < start_index ? -1000 : gallery.width()
+							})
+							.append($('<img>'))
+							.appendTo(gallery)
+							.data('src', src )
+							.data('title', title)
+							.data('desc', description)
+							.data('caption', caption)
+							.data('attachment-id', attachment_id)
+							.data('permalink', src_item.parents('a').attr('href'))
+							.data('orig-size', orig_size)
+							.data('comments-opened', comments_opened)
+							.data('image-meta', image_meta)
+							.data('medium-file', medium_file)
+							.data('large-file', large_file)
+							.data('orig-file', orig_file)
+							.jp_carousel('fitSlide', false);
 
-				
-				// Preloading all images
-				slide.find('img').first().attr('src', src );
+					// Preloading all images
+					slide.find('img').first().attr('src', src );
+				}
 			});
 			return this;
 		},
@@ -852,7 +860,7 @@ jQuery(document).ready(function($) {
 
 		shutterSpeed: function(d) {
 			if (d >= 1)
-				Math.round(d) + 's';
+				return Math.round(d) + 's';
 			var df = 1, top = 1, bot = 1;
 			var limit = 1e5; //Increase for greater precision.
 			while (df != d && limit-- > 0) {
@@ -968,7 +976,7 @@ jQuery(document).ready(function($) {
 		getFullSizeLink: function(current) {
 			if(!current || !current.data)
 				return false;
-			var original  = current.data('src').replace(/\?.+$/, ''),
+			var original  = current.data('orig-file').replace(/\?.+$/, ''),
 				origSize  = current.data('orig-size').split(','),
 				permalink = $( '<a>'+gallery.jp_carousel('format', {'text': jetpackCarouselStrings.download_original, 'replacements': origSize})+'</a>' )
 					.addClass( 'jp-carousel-image-download' )
@@ -1151,6 +1159,8 @@ jQuery(document).ready(function($) {
 
 	// register the event listener for staring the gallery
 	$( document.body ).on( 'click', 'div.gallery,div.tiled-gallery', function(e) {
+		if ( ! $(this).jp_carousel( 'testForData', e.currentTarget ) )
+			return;
 		if ( $(e.target).parent().hasClass('gallery-caption') )
 			return;
 		e.preventDefault();
@@ -1161,6 +1171,9 @@ jQuery(document).ready(function($) {
 	if ( document.location.hash && document.location.hash.match(/jp-carousel-(\d+)/) ) {
 		$(document).ready(function(){
 			var gallery = $('div.gallery, div.tiled-gallery'), index = -1, n = document.location.hash.match(/jp-carousel-(\d+)/);
+			
+			if ( ! $(this).jp_carousel( 'testForData', gallery ) )
+				return;
 
 			n = parseInt(n[1], 10);
 
