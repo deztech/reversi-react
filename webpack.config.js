@@ -11,7 +11,8 @@ const baseConfig = {
 		'babel-polyfill'
 	],
 	output: {
-		path: __dirname + '/',
+		//path: __dirname + '/app',
+        path: __dirname + '/',
 		filename: 'app.js'
 	},
 	resolve: {

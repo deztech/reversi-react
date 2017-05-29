@@ -11,13 +11,14 @@ interface NavProps {
 }
 
 export class Nav extends React.Component<NavProps, {}> {
+
 	render() {
 		const { activePage } = this.props;
 
 		const renderNavItem = (pageKey: PageKey, label: string) => {
 			return (
-				<li className={Classnames('Nav-item', activePage === pageKey && 'Nav-item--active')}>
-					<a className="Nav-link" href="javascript://" onClick={() => { this.props.onNavigate(pageKey); }}>
+                <li className="nav-item">
+                    <a className={Classnames('nav-link', activePage === pageKey && 'nav-link-active')} href="javascript:void(0)" onClick={() => { this.props.onNavigate(pageKey); }}>
 						{label}
 					</a>
 				</li>
@@ -25,19 +26,20 @@ export class Nav extends React.Component<NavProps, {}> {
 		};
 
 		return (
-			<nav className="Nav">
-				<ul>
-					{renderNavItem(PageKey.Flightplan, 'Flightplan')}
-					{renderNavItem(PageKey.Zazzle, 'Zazzle')}
-					{renderNavItem(PageKey.SecondaryMissions, 'Secondary missions')}
-					{renderNavItem(PageKey.Resume, 'Resume')}
-					{renderNavItem(PageKey.Contact, 'Contact')}
-				</ul>
+            <nav className="navbar navbar-toggleable-sm bg-faded">
+                <button className="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i className="fa fa-bars" aria-hidden="true"></i></button>
 
-				<div className="Nav-toggle">
-					<span className="Nav-toggleContent"></span>
-				</div>
-			</nav>
+                <a className="navbar-brand" href="javascript:void(0)" onClick={() => { this.props.onNavigate(PageKey.Home); }}>Reversi</a>
+
+                <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul className="navbar navbar-nav mr-auto">
+					    {renderNavItem(PageKey.Home, 'Home')}
+					    {renderNavItem(PageKey.About, 'About')}
+					    {renderNavItem(PageKey.Rules, 'Rules')}
+                        {renderNavItem(PageKey.Name, 'Play!')}
+                    </ul>
+                </div>
+            </nav>
 		);
 	}
 }
