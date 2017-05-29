@@ -39,6 +39,7 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
-# React/Webpack Output
-/app.js
-/app.js.map
+### I realized I need to commit/push these so that Heroku can get them...
+### # React/Webpack Output
+### /app.js
+### /app.js.map
