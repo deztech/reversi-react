@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "5a3221126872ed2687b6"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "58091386cbaf915660ca"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -1451,13 +1451,12 @@ function _wrapComponent(id) {
 var Name = exports.Name = _wrapComponent('Name')(function (_React$Component) {
     _inherits(Name, _React$Component);
 
-    function Name(props) {
+    function Name() {
         _classCallCheck(this, Name);
 
-        var _this = _possibleConstructorReturn(this, (Name.__proto__ || Object.getPrototypeOf(Name)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (Name.__proto__ || Object.getPrototypeOf(Name)).apply(this, arguments));
 
         _this.state = {};
-        //this.state = { playerName: 'Anonymous' + Math.floor(Math.random() * 10000) } as NameState;
         return _this;
     }
 

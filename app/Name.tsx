@@ -17,11 +17,6 @@ interface NameState {
 
 export class Name extends React.Component<NameProps, NameState> {
 
-    constructor(props: NameProps) {
-        super(props);
-        //this.state = { playerName: 'Anonymous' + Math.floor(Math.random() * 10000) } as NameState;
-    }
-
     state = {
     } as NameState;
 
