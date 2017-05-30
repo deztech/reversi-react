@@ -30,7 +30,8 @@ export class App extends React.Component<{}, AppState> {
         playerName: ''
     } as AppState;
 
-    private navigateToPage = (pageKey: PageKey) => {
+    //Nav Component Handler(s)...
+    private handleNavAction = (pageKey: PageKey) => {
         if (this.state.activePage !== pageKey) {
             this.setState({
                 activePage: pageKey
@@ -38,13 +39,14 @@ export class App extends React.Component<{}, AppState> {
         }
     }
 
-    private handleNameChangeEvent(event: any) {
+    //Name Component Handler(s)...
+    private handleNameChangeEvent = (e: any) => {
         this.setState({
-            playerName: event.target.value
+            playerName: e.target.value
         });
     }
 
-    private handleNameSubmitEvent = (event: any) => {
+    private handleNameSubmitEvent = (e: any) => {
         if (this.state.playerName === '') {
             this.state.playerName = 'Anonymous' + Math.floor(Math.random() * 10000);
         }
@@ -53,6 +55,7 @@ export class App extends React.Component<{}, AppState> {
         });
     }
 
+    //Lobby Component Handler(s)...
     private sendNewChatMsg = (newMsg: string) => {
         this.setState({
             //ToDo: Not sure what to do here regarding the sockets...
@@ -62,19 +65,19 @@ export class App extends React.Component<{}, AppState> {
     private getPageComponent(pageKey: PageKey) {
         switch (pageKey) {
             case PageKey.About:
-                return <About onNavigate={this.navigateToPage} />;
+                return <About onNavigate={this.handleNavAction} />;
 
             case PageKey.Rules:
-                return <Rules onNavigate={this.navigateToPage} />;
+                return <Rules onNavigate={this.handleNavAction} />;
 
             case PageKey.Name:
-                return <Name onNavigate={this.navigateToPage} onNameChange={this.handleNameChangeEvent.bind(this)} onFormSubmit={this.handleNameSubmitEvent.bind(this)} playerName={this.state.playerName} />;
+                return <Name onNavigate={this.handleNavAction} onNameChange={this.handleNameChangeEvent} onFormSubmit={this.handleNameSubmitEvent} playerName={this.state.playerName} />;
 
             case PageKey.Lobby:
-                return <Lobby onNavigate={this.navigateToPage} onNewChatMsgSubmitted={this.sendNewChatMsg} playerName={this.state.playerName} />;
+                return <Lobby onNavigate={this.handleNavAction} onNewChatMsgSubmitted={this.sendNewChatMsg} playerName={this.state.playerName} />;
 
             default:
-                return <Home onNavigate={this.navigateToPage} />;
+                return <Home onNavigate={this.handleNavAction} />;
         }
     }
 
@@ -84,7 +87,7 @@ export class App extends React.Component<{}, AppState> {
         return (
             <div className="App container add-row-spacing">
                 <header>
-                    <Nav activePage={activePage} onNavigate={this.navigateToPage} />
+                    <Nav activePage={activePage} onNavigate={this.handleNavAction} />
                 </header>
                 <main>
                     {this.getPageComponent(activePage)}

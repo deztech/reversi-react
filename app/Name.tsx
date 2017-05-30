@@ -7,8 +7,8 @@ import './Name.less';
 
 interface NameProps {
     onNavigate: (toPage: PageKey) => void;
-    onNameChange: (event: any) => any;
-    onFormSubmit: (event: any) => any;
+    onNameChange: (e: any) => any;
+    onFormSubmit: (e: any) => any;
     playerName: string
 }
 
