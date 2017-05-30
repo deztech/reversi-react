@@ -1,4 +1,4 @@
-import Classnames from 'classnames';
+//import Classnames from 'classnames';
 import React from 'react';
 
 import { PageKey } from './App';
@@ -6,22 +6,27 @@ import { PageKey } from './App';
 import './Lobby.less';
 
 interface LobbyProps {
-    playerName: string;
     onNavigate: (toPage: PageKey) => void;
-    onNewChatMsgSubmitted: (newMsg: string) => void;
+    onLoad: () => any;
+    onMsgChange: (e: any) => any;
+    onMsgSubmit: (e: any) => any;
+    playerName: string;
+    currChatMsg: string;
 }
 
 interface LobbyState {
-    newMsg: string;
 }
 
 export class Lobby extends React.Component<LobbyProps, LobbyState> {
+
+    constructor(props: LobbyProps) {
+        super(props)
+
+        this.props.onLoad();
+    }
+
     state = {
     } as LobbyState;
-
-    public handleMsgChange(event: any): void {
-        this.setState({ newMsg: event.target.value });
-    }
 
     render() {
         return (
@@ -30,15 +35,13 @@ export class Lobby extends React.Component<LobbyProps, LobbyState> {
                     <div className="col">
                         <h1 className="text-center">Lobby</h1>
                         <h2>Welcome, <span id="username">{this.props.playerName}</span>!</h2>
-                        <form className="form-inline" onSubmit={() => { this.props.onNewChatMsgSubmitted(this.state.newMsg); }}>
-                            <div className="col-9">
-                                <label className="col-form-label sr-only">Enter Chat Message:</label>
-                                <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." value={this.state.newMsg} onChange={this.handleMsgChange} />
-                            </div>
-                            <div className="col-3">
-                                <button type="submit" className="btn btn-primary">Send</button>
-                            </div>
-                        </form>
+                        <div className="col-9">
+                            <label className="col-form-label sr-only">Enter Chat Message:</label>
+                            <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.props.onMsgChange} />
+                        </div>
+                        <div className="col-3">
+                            <button type="submit" className="btn btn-primary" onClick={this.props.onMsgSubmit}>Send</button>
+                        </div>
                     </div>
                 </div>
                 <div className="row">

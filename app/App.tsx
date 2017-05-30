@@ -1,4 +1,5 @@
 import React from 'react';
+import io from 'socket.io-client';
 
 import { Nav } from './Nav';
 import { Home } from './Home';
@@ -21,15 +22,59 @@ export enum PageKey {
 interface AppState {
     activePage: PageKey;
     playerName: string;
+    currChatMsg: string;
+    Socket: any;
 }
+
+const LOBBYROOMNAME: string = 'Lobby';
 
 export class App extends React.Component<{}, AppState> {
 
-	state = {
-        activePage: PageKey.Home,
-        playerName: ''
-    } as AppState;
+    private mSocket: SocketIOClient.Socket;
 
+    constructor() {
+        super();
+
+        //Init Client Socket.IO...
+        this.mSocket = io();
+
+        //Handle web socket event for log...
+        this.mSocket.on('log', (e: any): void => {
+            console.log.apply(console, e);
+        });
+
+        //Handle web socket event for join_room_response...
+        this.mSocket.on('join_room_response', (e: any): void => {
+            console.log('join_room_response: ' + JSON.stringify(e));
+            if (e.result === 'fail') {
+                alert(e.message);
+                return;
+            }
+            this.setState({
+                currChatMsg: '<em>' + e.username + ' has joined the ' + e.room + '!</em>'
+            });
+        });
+
+        //Handle web socket response for send_message...
+        this.mSocket.on('send_message_response', (e: any): void => {
+            console.log('send_message_response: ' + JSON.stringify(e));
+            if (e.result === 'fail') {
+                alert(e.message);
+                return;
+            }
+            this.setState({
+                currChatMsg: '<strong>' + e.username + ':</strong> ' + e.message
+            });
+        });
+    }
+
+    //Set initial App state...
+    state = {
+        activePage: PageKey.Home,
+        playerName: '',
+        currChatMsg: ''
+    } as AppState;
+    
     //Nav Component Handler(s)...
     private handleNavAction = (pageKey: PageKey) => {
         if (this.state.activePage !== pageKey) {
@@ -56,12 +101,25 @@ export class App extends React.Component<{}, AppState> {
     }
 
     //Lobby Component Handler(s)...
-    private sendNewChatMsg = (newMsg: string) => {
+    private handleLobbyLoad = () => {
+        var _JoinPayload: any = { room: LOBBYROOMNAME, username: this.state.playerName };
+        console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
+        this.mSocket.emit('join_room', _JoinPayload);
+    }
+
+    private handleLobbyMsgChangeEvent = (e: any) => {
         this.setState({
-            //ToDo: Not sure what to do here regarding the sockets...
+            currChatMsg: e.target.value
         });
     }
 
+    private handleLobbyMsgSubmitEvent = (e: any) => {
+        var _ChatPayload: any = { room: LOBBYROOMNAME, username: this.state.playerName, message: this.state.currChatMsg };
+        console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
+        this.mSocket.emit('send_message', _ChatPayload);
+    }
+
+    //Method to get the correct "Page" Component to return for the App's main render() method.
     private getPageComponent(pageKey: PageKey) {
         switch (pageKey) {
             case PageKey.About:
@@ -71,16 +129,17 @@ export class App extends React.Component<{}, AppState> {
                 return <Rules onNavigate={this.handleNavAction} />;
 
             case PageKey.Name:
-                return <Name onNavigate={this.handleNavAction} onNameChange={this.handleNameChangeEvent} onFormSubmit={this.handleNameSubmitEvent} playerName={this.state.playerName} />;
+                return <Name onNavigate={this.handleNavAction} onNameChange={this.handleNameChangeEvent} onNameSubmit={this.handleNameSubmitEvent} playerName={this.state.playerName} />;
 
             case PageKey.Lobby:
-                return <Lobby onNavigate={this.handleNavAction} onNewChatMsgSubmitted={this.sendNewChatMsg} playerName={this.state.playerName} />;
+                return <Lobby onNavigate={this.handleNavAction} onLoad={this.handleLobbyLoad} onMsgChange={this.handleLobbyMsgChangeEvent} onMsgSubmit={this.handleLobbyMsgSubmitEvent} playerName={this.state.playerName} currChatMsg={this.state.currChatMsg} />;
 
             default:
                 return <Home onNavigate={this.handleNavAction} />;
         }
     }
 
+    //Main App render() method...
 	render() {
         const { activePage } = this.state;
 

@@ -1,4 +1,4 @@
-import Classnames from 'classnames';
+//import Classnames from 'classnames';
 import React from 'react';
 
 import { PageKey } from './App';
@@ -8,15 +8,14 @@ import './Name.less';
 interface NameProps {
     onNavigate: (toPage: PageKey) => void;
     onNameChange: (e: any) => any;
-    onFormSubmit: (e: any) => any;
-    playerName: string
+    onNameSubmit: (e: any) => any;
+    playerName: string;
 }
 
 interface NameState {
 }
 
 export class Name extends React.Component<NameProps, NameState> {
-
     state = {
     } as NameState;
 
@@ -35,7 +34,7 @@ export class Name extends React.Component<NameProps, NameState> {
                         <input id="username" className="form-control" type="text" placeholder="Enter your username..." onChange={this.props.onNameChange} />
                     </div>
                     <div className="col-3">
-                        <button type="submit" className="btn btn-primary" onClick={this.props.onFormSubmit}>Play</button>
+                        <button type="submit" className="btn btn-primary" onClick={this.props.onNameSubmit}>Play</button>
                     </div>
                 </div>
                 <div className="row text-center">
