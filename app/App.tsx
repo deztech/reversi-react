@@ -157,7 +157,7 @@ export class App extends React.Component<{}, AppState> {
                             <span>
                                 By <a href="http://aaronsoto.com" target="_blank">Aaron Soto <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
                                 For <a href="http://mhcid.ics.uci.edu/" target="_blank">UC Irvine's MHCID Program <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
-                                <a href="https://GitHub.com/deztech/reversi" target="_blank">GitHub.com/deztech/reversi <i className="fa fa-external-link" aria-hidden="true"></i></a>
+                                <a href="https://github.com/deztech/reversi-react" target="_blank">GitHub.com/deztech/reversi-react <i className="fa fa-external-link" aria-hidden="true"></i></a>
                             </span>
                         </div>
                     </div>
