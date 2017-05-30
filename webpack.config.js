@@ -30,7 +30,7 @@ const baseConfig = {
 
 const devConfig = {
 	entry: [
-		'webpack-dev-server/client?http://localhost:8080',
+		'webpack-dev-server/client?http://localhost:8080/',
 		'react-hot-loader/patch',
 		'webpack/hot/only-dev-server',
 		'./app/index.tsx'
@@ -40,7 +40,7 @@ const devConfig = {
 	},
 	devtool: 'source-map',
 	devServer: {
-		host: '0.0.0.0',
+        host: 'localhost',
 		port: 8080,
 		hot: true,
 		disableHostCheck: true
