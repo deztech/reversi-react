@@ -34,7 +34,9 @@ export class Lobby extends React.Component<LobbyProps, LobbyState> {
 
     render() {
         const LobbyMembers = this.props.LobbyMembers.map((_LobbyMember:LobbyMember) => {
-            return <div key={_LobbyMember.socketid} className="LobbyMember row"><div className="col-9 no-gutters"><strong>{_LobbyMember.username}</strong></div><div className="col-3 no-gutters"><button type="submit" className="btn btn-primary pull-right">Invite</button></div></div>;
+            if(_LobbyMember.username !== this.props.PlayerName) {
+                return <div key={_LobbyMember.socketid} className="LobbyMember row"><div className="col-9 no-gutters"><strong>{_LobbyMember.username}</strong></div><div className="col-3 no-gutters"><button type="submit" className="btn btn-primary pull-right">Invite</button></div></div>;
+            }
         });
         
         const ChatMsgs = this.props.ChatMsgs.map((_ChatMsg:ChatMsg) => {
