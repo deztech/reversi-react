@@ -58,7 +58,7 @@ export class Lobby extends React.Component<LobbyProps, LobbyState> {
                         <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.props.onMsgChange} />
                     </div>
                     <div className="col-3">
-                        <button type="submit" className="btn btn-primary" onClick={this.props.onMsgSubmit}>Send</button>
+                        <button type="submit" className="btn btn-primary pull-right" onClick={this.props.onMsgSubmit}>Send</button>
                     </div>
                 </div>
                 <div className="chatmessages row">
