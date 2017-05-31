@@ -7,9 +7,9 @@ import './Name.less';
 
 interface NameProps {
     onNavigate: (toPage: PageKey) => void;
-    onNameChange: (e: any) => any;
-    onNameSubmit: (e: any) => any;
-    playerName: string;
+    onNameChange: (e: React.FormEvent<HTMLInputElement>) => void;
+    onNameSubmit: (e: React.FormEvent<HTMLButtonElement>) => void;
+    PlayerName: string;
 }
 
 interface NameState {

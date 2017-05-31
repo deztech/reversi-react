@@ -19,10 +19,59 @@ export enum PageKey {
 	Lobby
 }
 
+export interface LobbyMember {
+    timestamp: Date;
+    socketid: string;
+    username: string;
+}
+
+export interface ChatMsg {
+    timestamp: Date;
+    username: string;
+    message: string;
+}
+
+export interface IJoinRoom {
+    room: string;
+    username: string;
+}
+
+export interface IJoinRoomResponse {
+    result: string;
+    message: string;
+    room: string;
+    socketid: string;
+    username: string;
+    membership: number;
+    members: LobbyMember[];
+}
+
+export interface IDisconnectResponse {
+    socketid: string;
+    username: string;
+    membership: number;
+    members: LobbyMember[];
+}
+
+export interface ISendMessage {
+    room: string;
+    username: string;
+    message: string;
+}
+
+export interface ISendMessageResponse {
+    result: string;
+    message: string;
+    room: string;
+    username: string;
+}
+
 interface AppState {
-    activePage: PageKey;
-    playerName: string;
-    currChatMsg: string;
+    ActivePage: PageKey;
+    PlayerName: string;
+    NewChatMsgVal: string;
+    LobbyMembers: LobbyMember[];
+    ChatMsgs: ChatMsg[];
     Socket: any;
 }
 
@@ -44,112 +93,166 @@ export class App extends React.Component<{}, AppState> {
         });
 
         //Handle web socket event for join_room_response...
-        this.mSocket.on('join_room_response', (e: any): void => {
+        this.mSocket.on('join_room_response', (e: IJoinRoomResponse): void => {
+            //Logging and Error Handling...
             console.log('join_room_response: ' + JSON.stringify(e));
             if (e.result === 'fail') {
                 alert(e.message);
                 return;
             }
+
+            // //Update LobbyMembers...
+            // let _NewLobbyMembers: LobbyMember[] = this.state.LobbyMembers.slice();
+            // _NewLobbyMembers.push({ timestamp:Date.now(), socketid:e.socketid, username:e.username });
+
+            //Update ChatMsgs...
+            let _NewChatMsgs: ChatMsg[] = this.state.ChatMsgs.slice();
+            _NewChatMsgs.push({ timestamp:new Date(), username:e.username, message:'Has joined the ' + LOBBYROOMNAME + '!' });
+            
+            //Update State...
             this.setState({
-                currChatMsg: '<em>' + e.username + ' has joined the ' + e.room + '!</em>'
+                LobbyMembers: e.members,
+                ChatMsgs: _NewChatMsgs
+            });
+        });
+
+        //Handle web socket event for join_room_response...
+        this.mSocket.on('disconnect_response', (e: IDisconnectResponse): void => {
+            //Logging and Error Handling...
+            console.log('disconnect_response: ' + JSON.stringify(e));
+
+            //Update ChatMsgs...
+            let _NewChatMsgs: ChatMsg[] = this.state.ChatMsgs.slice();
+            _NewChatMsgs.push({ timestamp:new Date(), username:e.username, message:'Has left the ' + LOBBYROOMNAME + '!' });
+            
+            //Update State...
+            this.setState({
+                LobbyMembers: e.members,
+                ChatMsgs: _NewChatMsgs
             });
         });
 
         //Handle web socket response for send_message...
-        this.mSocket.on('send_message_response', (e: any): void => {
+        this.mSocket.on('send_message_response', (e: ISendMessageResponse): void => {
+            //Logging and Error Handling...
             console.log('send_message_response: ' + JSON.stringify(e));
             if (e.result === 'fail') {
                 alert(e.message);
                 return;
             }
+
+            //Update NewChatMsgVal to '' if the message received is from the current/active player...
+            let _NewChatMsgVal = this.state.NewChatMsgVal;
+            if(e.username === this.state.PlayerName) {
+                _NewChatMsgVal = '';
+            }
+
+            //Update ChatMsgs...
+            let _NewChatMsgs: ChatMsg[] = this.state.ChatMsgs.slice();
+            _NewChatMsgs.push({ timestamp:new Date(), username:e.username, message:e.message });
+            
+            //Update State...
             this.setState({
-                currChatMsg: '<strong>' + e.username + ':</strong> ' + e.message
+                NewChatMsgVal: _NewChatMsgVal,
+                ChatMsgs: _NewChatMsgs
             });
         });
     }
 
     //Set initial App state...
     state = {
-        activePage: PageKey.Home,
-        playerName: '',
-        currChatMsg: ''
+        ActivePage: PageKey.Home,
+        PlayerName: '',
+        NewChatMsgVal: '',
+        LobbyMembers: [],
+        ChatMsgs: []
     } as AppState;
     
     //Nav Component Handler(s)...
     private handleNavAction = (pageKey: PageKey) => {
-        if (this.state.activePage !== pageKey) {
+        if (this.state.ActivePage !== pageKey) {
             this.setState({
-                activePage: pageKey
+                ActivePage: pageKey
             });
         }
     }
 
     //Name Component Handler(s)...
-    private handleNameChangeEvent = (e: any) => {
+    private handleNameChangeEvent = (e: React.FormEvent<HTMLInputElement>) => {
         this.setState({
-            playerName: e.target.value
+            PlayerName: e.currentTarget.value
         });
     }
 
-    private handleNameSubmitEvent = (e: any) => {
-        if (this.state.playerName === '') {
-            this.state.playerName = 'Anonymous' + Math.floor(Math.random() * 10000);
+    private handleNameSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
+        if (this.state.PlayerName === '') {
+            this.state.PlayerName = 'Anonymous' + Math.floor(Math.random() * 10000);
         }
         this.setState({
-            activePage: PageKey.Lobby,
+            ActivePage: PageKey.Lobby,
         });
     }
 
     //Lobby Component Handler(s)...
     private handleLobbyLoad = () => {
-        var _JoinPayload: any = { room: LOBBYROOMNAME, username: this.state.playerName };
+        let _JoinPayload: IJoinRoom = { room: LOBBYROOMNAME, username: this.state.PlayerName };
         console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
         this.mSocket.emit('join_room', _JoinPayload);
     }
 
-    private handleLobbyMsgChangeEvent = (e: any) => {
+    private handleLobbyMsgChangeEvent = (e: React.FormEvent<HTMLInputElement>) => {
         this.setState({
-            currChatMsg: e.target.value
+            NewChatMsgVal: e.currentTarget.value
         });
     }
 
-    private handleLobbyMsgSubmitEvent = (e: any) => {
-        var _ChatPayload: any = { room: LOBBYROOMNAME, username: this.state.playerName, message: this.state.currChatMsg };
+    private handleLobbyMsgSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
+        let _ChatPayload: ISendMessage = { room: LOBBYROOMNAME, username: this.state.PlayerName, message: this.state.NewChatMsgVal };
         console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
         this.mSocket.emit('send_message', _ChatPayload);
     }
 
-    //Method to get the correct "Page" Component to return for the App's main render() method.
-    private getPageComponent(pageKey: PageKey) {
-        switch (pageKey) {
-            case PageKey.About:
-                return <About onNavigate={this.handleNavAction} />;
-
-            case PageKey.Rules:
-                return <Rules onNavigate={this.handleNavAction} />;
-
-            case PageKey.Name:
-                return <Name onNavigate={this.handleNavAction} onNameChange={this.handleNameChangeEvent} onNameSubmit={this.handleNameSubmitEvent} playerName={this.state.playerName} />;
-
-            case PageKey.Lobby:
-                return <Lobby onNavigate={this.handleNavAction} onLoad={this.handleLobbyLoad} onMsgChange={this.handleLobbyMsgChangeEvent} onMsgSubmit={this.handleLobbyMsgSubmitEvent} playerName={this.state.playerName} currChatMsg={this.state.currChatMsg} />;
-
-            default:
-                return <Home onNavigate={this.handleNavAction} />;
-        }
-    }
-
     //Main App render() method...
 	render() {
-        const { activePage } = this.state;
+        const { ActivePage } = this.state;
+
+        //Get the correct "Page" Component to return for the App's main render() method.
+        const renderPageComponent = (pageKey: PageKey) => {
+            switch (pageKey) {
+                case PageKey.About:
+                    return <About onNavigate={this.handleNavAction} />;
+
+                case PageKey.Rules:
+                    return <Rules onNavigate={this.handleNavAction} />;
+
+                case PageKey.Name:
+                    return <Name onNavigate={this.handleNavAction} 
+                                onNameChange={this.handleNameChangeEvent} 
+                                onNameSubmit={this.handleNameSubmitEvent} 
+                                PlayerName={this.state.PlayerName} />;
+
+                case PageKey.Lobby:
+                    return <Lobby onNavigate={this.handleNavAction} 
+                                onLoad={this.handleLobbyLoad} 
+                                onMsgChange={this.handleLobbyMsgChangeEvent} 
+                                onMsgSubmit={this.handleLobbyMsgSubmitEvent} 
+                                PlayerName={this.state.PlayerName} 
+                                NewChatMsgVal={this.state.NewChatMsgVal} 
+                                ChatMsgs={this.state.ChatMsgs}
+                                LobbyMembers={this.state.LobbyMembers} />;
+
+                default:
+                    return <Home onNavigate={this.handleNavAction} />;
+            }
+        };
 
         return (
             <div className="App container add-row-spacing">
                 <header>
-                    <Nav activePage={activePage} onNavigate={this.handleNavAction} />
+                    <Nav ActivePage={ActivePage} onNavigate={this.handleNavAction} />
                 </header>
                 <main>
-                    {this.getPageComponent(activePage)}
+                    {renderPageComponent(ActivePage)}
                 </main>
                 <footer>
                     <div className="row text-center">

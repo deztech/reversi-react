@@ -6,19 +6,19 @@ import { PageKey } from './App';
 import './Nav.less';
 
 interface NavProps {
-	activePage: PageKey;
+	ActivePage: PageKey;
 	onNavigate: (toPage: PageKey) => void;
 }
 
 export class Nav extends React.Component<NavProps, {}> {
 
 	render() {
-		const { activePage } = this.props;
+		const { ActivePage } = this.props;
 
 		const renderNavItem = (pageKey: PageKey, label: string) => {
 			return (
                 <li className="nav-item">
-                    <a className={Classnames('nav-link', activePage === pageKey && 'nav-link-active')} href="javascript:void(0)" onClick={() => { this.props.onNavigate(pageKey); }}>
+                    <a className={Classnames('nav-link', ActivePage === pageKey && 'nav-link-active')} href="javascript:void(0)" onClick={() => { this.props.onNavigate(pageKey); }}>
 						{label}
 					</a>
 				</li>

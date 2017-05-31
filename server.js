@@ -38,6 +38,7 @@ console.log('SERVER IS RUNNING...');
 //////////////////////////////// WEB SOCKET SETUP ////////////////////////////////
 
 var _mIO = require('socket.io').listen(_mApp);
+var _mPlayerData = [];
 
 _mIO.sockets.on('connection', function (_Socket) {
     function log() {
@@ -50,10 +51,37 @@ _mIO.sockets.on('connection', function (_Socket) {
         _Socket.broadcast.emit('log', _Array);
     }
 
-    log('A website CONNECTED to the server.');
+    log('A client CONNECTED to the server.');
 
     _Socket.on('disconnect', function () {
-        log('A website DISconnected from the server.');
+        log('A client DISconnected from the server.');
+        if('undefined' != typeof _Socket.id) {
+            var _DisconnectedPlayerIndex;
+            var _RoomMembers = [];
+            for(var i = 0; i < _mPlayerData.length; i++) {
+                if(_mPlayerData[i].socketid === _Socket.id) {
+                    _DisconnectedPlayerIndex = i;
+                }
+                else {
+                    var _RoomMember = {};
+                    _RoomMember.timestamp = _mPlayerData[i].timestamp;
+                    _RoomMember.socketid = _mPlayerData[i].socketid;
+                    _RoomMember.username = _mPlayerData[i].username;
+                    _RoomMembers.push(_RoomMember);
+                }
+            }
+            if('undefined' != typeof _DisconnectedPlayerIndex && _DisconnectedPlayerIndex >= 0 && _DisconnectedPlayerIndex < _mPlayerData.length) {
+                var _SuccessData = {
+                    username: _mPlayerData[_DisconnectedPlayerIndex].username, 
+                    socket_id: _Socket.id, 
+                    membership: _RoomMembers.length, 
+                    members:_RoomMembers
+                };
+                log('disconnect_response: ' + JSON.stringify(_SuccessData));
+                _mIO.in(_mPlayerData[_DisconnectedPlayerIndex].room).emit('disconnect_response', _SuccessData);
+                _mPlayerData.splice(_DisconnectedPlayerIndex, 1);
+            }
+        }
     });
 
     //_Payload: room=room to join; username=user joining
@@ -84,7 +112,8 @@ _mIO.sockets.on('connection', function (_Socket) {
             _Socket.emit('join_room_response', { result: 'fail', message: _Msg });
             return;
         }
-
+        
+        //Join the Socket room...
         _Socket.join(_Room);
 
         var _RoomObject = _mIO.sockets.adapter.rooms[_Room];
@@ -95,14 +124,30 @@ _mIO.sockets.on('connection', function (_Socket) {
             return;
         }
 
-        var _NumClients = _RoomObject.length;
+        //Add Player Data...
+        _mPlayerData.push({ timestamp:Date.now(), socketid:_Socket.id, room:_Room, username:_Username });
+        
+        var _RoomMembers = [];
+        for(var i = 0; i < _mPlayerData.length; i++) {
+            if(_mPlayerData[i].room === _Room) {
+                var _RoomMember = {};
+                _RoomMember.timestamp = _mPlayerData[i].timestamp;
+                _RoomMember.socketid = _mPlayerData[i].socketid;
+                _RoomMember.username = _mPlayerData[i].username;
+                _RoomMembers.push(_RoomMember);
+            }
+        }
+
         var _SuccessData = {
             result: 'success',
             room: _Room,
+            socketid: _Socket.id,
             username: _Username,
-            membership: (_NumClients + 1)
+            membership: _RoomMembers.length,
+            members: _RoomMembers
         };
         _mIO.sockets.in(_Room).emit('join_room_response', _SuccessData);
+        log('join_room_response: ' + JSON.stringify(_SuccessData));
         log('Room ' + _Room + ' was joined by ' + _Username + '.');
     });
 
