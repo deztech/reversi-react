@@ -7,6 +7,7 @@ import { About } from './About';
 import { Rules } from './Rules';
 import { Name } from './Name';
 import { Lobby } from './Lobby';
+import { Chat } from './Chat';
 
 import './lib/reset.less';
 import './App.less';
@@ -232,14 +233,18 @@ export class App extends React.Component<{}, AppState> {
                                 PlayerName={this.state.PlayerName} />;
 
                 case PageKey.Lobby:
-                    return <Lobby onNavigate={this.handleNavAction} 
-                                onLoad={this.handleLobbyLoad} 
-                                onMsgChange={this.handleLobbyMsgChangeEvent} 
-                                onMsgSubmit={this.handleLobbyMsgSubmitEvent} 
-                                PlayerName={this.state.PlayerName} 
-                                NewChatMsgVal={this.state.NewChatMsgVal} 
-                                ChatMsgs={this.state.ChatMsgs}
-                                LobbyMembers={this.state.LobbyMembers} />;
+                    return <div id="LobbyChat">
+                            <Lobby onNavigate={this.handleNavAction} 
+                                   onLoad={this.handleLobbyLoad} 
+                                   PlayerName={this.state.PlayerName} 
+                                   LobbyMembers={this.state.LobbyMembers} />
+                            <Chat  onNavigate={this.handleNavAction} 
+                                   onMsgChange={this.handleLobbyMsgChangeEvent} 
+                                   onMsgSubmit={this.handleLobbyMsgSubmitEvent} 
+                                   PlayerName={this.state.PlayerName} 
+                                   NewChatMsgVal={this.state.NewChatMsgVal} 
+                                   ChatMsgs={this.state.ChatMsgs} />
+                           </div>;
 
                 default:
                     return <Home onNavigate={this.handleNavAction} />;

@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "2bcc3bc90ce43cacd3c6"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "fb29682405b9f8ae17c8"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -933,6 +933,8 @@ var _Name = __webpack_require__("./app/Name.tsx");
 
 var _Lobby = __webpack_require__("./app/Lobby.tsx");
 
+var _Chat = __webpack_require__("./app/Chat.tsx");
+
 __webpack_require__("./app/lib/reset.less");
 
 __webpack_require__("./app/App.less");
@@ -1118,7 +1120,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
                     case PageKey.Name:
                         return _react3.default.createElement(_Name.Name, { onNavigate: _this2.handleNavAction, onNameChange: _this2.handleNameChangeEvent, onNameSubmit: _this2.handleNameSubmitEvent, PlayerName: _this2.state.PlayerName });
                     case PageKey.Lobby:
-                        return _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onLoad: _this2.handleLobbyLoad, onMsgChange: _this2.handleLobbyMsgChangeEvent, onMsgSubmit: _this2.handleLobbyMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs, LobbyMembers: _this2.state.LobbyMembers });
+                        return _react3.default.createElement("div", null, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onLoad: _this2.handleLobbyLoad, PlayerName: _this2.state.PlayerName, LobbyMembers: _this2.state.LobbyMembers }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgChange: _this2.handleLobbyMsgChangeEvent, onMsgSubmit: _this2.handleLobbyMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
                     default:
                         return _react3.default.createElement(_Home.Home, { onNavigate: _this2.handleNavAction });
                 }
@@ -1142,6 +1144,144 @@ var _temp = function () {
     __REACT_HOT_LOADER__.register(LOBBYROOMNAME, 'LOBBYROOMNAME', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/App.tsx');
 
     __REACT_HOT_LOADER__.register(App, 'App', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/App.tsx');
+}();
+
+;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__("./node_modules/webpack/buildin/module.js")(module)))
+
+/***/ }),
+
+/***/ "./app/Chat.less":
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__("./node_modules/css-loader/index.js?{\"sourceMap\":true}!./node_modules/less-loader/dist/index.js?{\"sourceMap\":true}!./node_modules/postcss-loader/lib/index.js?{}!./app/Chat.less");
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__("./node_modules/style-loader/lib/addStyles.js")(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(true) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("./node_modules/css-loader/index.js?{\"sourceMap\":true}!./node_modules/less-loader/dist/index.js?{\"sourceMap\":true}!./node_modules/postcss-loader/lib/index.js?{}!./app/Chat.less", function() {
+			var newContent = __webpack_require__("./node_modules/css-loader/index.js?{\"sourceMap\":true}!./node_modules/less-loader/dist/index.js?{\"sourceMap\":true}!./node_modules/postcss-loader/lib/index.js?{}!./app/Chat.less");
+			if(typeof newContent === 'string') newContent = [[module.i, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+
+/***/ "./app/Chat.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Chat = undefined;
+
+var _index = __webpack_require__("./node_modules/redbox-react/lib/index.js");
+
+var _index2 = _interopRequireDefault(_index);
+
+var _index3 = __webpack_require__("./node_modules/react-transform-catch-errors/lib/index.js");
+
+var _index4 = _interopRequireDefault(_index3);
+
+var _react2 = __webpack_require__("./node_modules/react/react.js");
+
+var _react3 = _interopRequireDefault(_react2);
+
+var _index5 = __webpack_require__("./node_modules/react-transform-hmr/lib/index.js");
+
+var _index6 = _interopRequireDefault(_index5);
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+__webpack_require__("./app/Chat.less");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _components = {
+    Chat: {
+        displayName: 'Chat'
+    }
+};
+
+var _CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformHmrLibIndexJs2 = (0, _index6.default)({
+    filename: 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.tsx',
+    components: _components,
+    locals: [module],
+    imports: [_react3.default]
+});
+
+var _CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformCatchErrorsLibIndexJs2 = (0, _index4.default)({
+    filename: 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.tsx',
+    components: _components,
+    locals: [],
+    imports: [_react3.default, _index2.default]
+});
+
+function _wrapComponent(id) {
+    return function (Component) {
+        return _CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformHmrLibIndexJs2(_CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformCatchErrorsLibIndexJs2(Component, id), id);
+    };
+} //import Classnames from 'classnames';
+
+
+var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
+    _inherits(Chat, _React$Component);
+
+    function Chat() {
+        _classCallCheck(this, Chat);
+
+        var _this = _possibleConstructorReturn(this, (Chat.__proto__ || Object.getPrototypeOf(Chat)).apply(this, arguments));
+
+        _this.state = {};
+        return _this;
+    }
+
+    _createClass(Chat, [{
+        key: 'render',
+        value: function render() {
+            var ChatMsgs = this.props.ChatMsgs.map(function (_ChatMsg) {
+                return _react3.default.createElement("div", { key: _ChatMsg.timestamp.getMilliseconds(), className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.message));
+            });
+            return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.props.onMsgChange })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.props.onMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs))));
+        }
+    }]);
+
+    return Chat;
+}(_react3.default.Component));
+
+;
+
+var _temp = function () {
+    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
+        return;
+    }
+
+    __REACT_HOT_LOADER__.register(Chat, 'Chat', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.tsx');
 }();
 
 ;
@@ -1417,10 +1557,7 @@ var Lobby = exports.Lobby = _wrapComponent('Lobby')(function (_React$Component) 
                     return _react3.default.createElement("div", { key: _LobbyMember.socketid, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _LobbyMember.username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right" }, "Invite")));
                 }
             });
-            var ChatMsgs = this.props.ChatMsgs.map(function (_ChatMsg) {
-                return _react3.default.createElement("div", { key: _ChatMsg.timestamp.getMilliseconds(), className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.message));
-            });
-            return _react3.default.createElement("div", { className: "LobbyComponent" }, _react3.default.createElement("div", { className: "welcome row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h1", { className: "text-center" }, "Lobby"), _react3.default.createElement("h2", null, "Welcome, ", _react3.default.createElement("span", { id: "username" }, this.props.PlayerName), "!"))), _react3.default.createElement("div", { id: "players" }, LobbyMembers), _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.props.onMsgChange })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.props.onMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs))));
+            return _react3.default.createElement("div", { className: "LobbyComponent" }, _react3.default.createElement("div", { className: "welcome row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h1", { className: "text-center" }, "Lobby"), _react3.default.createElement("h2", null, "Welcome, ", _react3.default.createElement("span", { id: "username" }, this.props.PlayerName), "!"))), _react3.default.createElement("div", { id: "players" }, LobbyMembers));
         }
     }]);
 
@@ -10423,6 +10560,21 @@ exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Khu
 
 // module
 exports.push([module.i, "* {\n  font-family: 'Khula', sans-serif;\n}\nbody {\n  background-color: #ccf;\n}\n.container {\n  max-width: 960px;\n}\n.add-row-spacing div.row {\n  margin: 15px 0;\n}\n.btn-minwidth {\n  min-width: 120px;\n}\nh1 {\n  margin-top: 10px;\n}\n#formName {\n  margin-bottom: 50px;\n}\nfooter span {\n  font-size: 0.9rem;\n  line-height: 0.9em;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/App.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/App.less"],"names":[],"mappings":"AAMA;EACI,iCAAA;CCFH;ADKD;EACI,uBAAA;CCHH;ADMD;EACI,iBAAA;CCJH;ADOD;EACI,eAAA;CCLH;ADQD;EACI,iBAAA;CCNH;ADSD;EACI,iBAAA;CCPH;ADUD;EACI,oBAAA;CCRH;ADWD;EACI,kBAAA;EACA,mBAAA;CCTH","file":"App.less","sourcesContent":["@import (reference) './lib/definitions.less';\n\n@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css');\n@import url('/misc/font-awesome-4.7.0/css/font-awesome.min.css');\n@import url('https://fonts.googleapis.com/css?family=Khula:400,700');\n\n* {\n    font-family: 'Khula', sans-serif;\n}\n\nbody {\n    background-color: #ccf;\n}\n\n.container {\n    max-width: 960px;\n}\n\n.add-row-spacing div.row {\n    margin: 15px 0;\n}\n\n.btn-minwidth {\n    min-width:120px;\n}\n\nh1 {\n    margin-top: 10px;\n}\n\n#formName {\n    margin-bottom: 50px;\n}\n\nfooter span {\n    font-size: 0.9rem;\n    line-height: 0.9em;\n}","@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css');\n@import url('/misc/font-awesome-4.7.0/css/font-awesome.min.css');\n@import url('https://fonts.googleapis.com/css?family=Khula:400,700');\n* {\n  font-family: 'Khula', sans-serif;\n}\nbody {\n  background-color: #ccf;\n}\n.container {\n  max-width: 960px;\n}\n.add-row-spacing div.row {\n  margin: 15px 0;\n}\n.btn-minwidth {\n  min-width: 120px;\n}\nh1 {\n  margin-top: 10px;\n}\n#formName {\n  margin-bottom: 50px;\n}\nfooter span {\n  font-size: 0.9rem;\n  line-height: 0.9em;\n}\n"],"sourceRoot":""}]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?{\"sourceMap\":true}!./node_modules/less-loader/dist/index.js?{\"sourceMap\":true}!./node_modules/postcss-loader/lib/index.js?{}!./app/Chat.less":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/css-base.js")(true);
+// imports
+
+
+// module
+exports.push([module.i, "", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"Chat.less","sourceRoot":""}]);
 
 // exports
 
