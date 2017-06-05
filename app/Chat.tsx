@@ -2,7 +2,7 @@
 import React from 'react';
 
 import { PageKey } from './App';
-import { ChatMsg } from './App';
+import { IChatMsg } from './App';
 
 import './Chat.less';
 
@@ -12,7 +12,7 @@ interface ChatProps {
     onMsgSubmit: (e: React.FormEvent<HTMLButtonElement>) => void;
     PlayerName: string;
     NewChatMsgVal: string;
-    ChatMsgs: ChatMsg[];
+    ChatMsgs: IChatMsg[];
 }
 
 interface ChatState {
@@ -24,8 +24,8 @@ export class Chat extends React.Component<ChatProps, ChatState> {
     } as ChatState;
 
     render() {
-        const ChatMsgs = this.props.ChatMsgs.map((_ChatMsg:ChatMsg) => {
-            return <div key={_ChatMsg.timestamp.getMilliseconds()} className="ChatMsg"><strong>{_ChatMsg.username}:</strong> <span>{_ChatMsg.message}</span></div>;
+        const ChatMsgs = this.props.ChatMsgs.reverse().map((_ChatMsg:IChatMsg) => {
+            return <div key={_ChatMsg.AddedOn.getMilliseconds()} className="ChatMsg"><strong>{_ChatMsg.Username}:</strong> <span>{_ChatMsg.Message}</span></div>;
         });
 
         return (

@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "fb29682405b9f8ae17c8"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "554430ed8aa051938088"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -972,7 +972,11 @@ function _wrapComponent(id) {
         return _CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformHmrLibIndexJs2(_CDezTechGoogleDriveRoot_DezTechMHCIDClasses285InteractiveTechnologyReversiReactNode_modulesReactTransformCatchErrorsLibIndexJs2(Component, id), id);
     };
 }
+//import { IKeyedCollection } from './IKeyedCollection';
+//import { KeyedCollection } from './IKeyedCollection';
 
+
+//Enum of "pages" within the app...
 var PageKey = exports.PageKey = undefined;
 (function (PageKey) {
     PageKey[PageKey["Home"] = 0] = "Home";
@@ -980,6 +984,7 @@ var PageKey = exports.PageKey = undefined;
     PageKey[PageKey["Rules"] = 2] = "Rules";
     PageKey[PageKey["Name"] = 3] = "Name";
     PageKey[PageKey["Lobby"] = 4] = "Lobby";
+    PageKey[PageKey["Game"] = 5] = "Game";
 })(PageKey || (exports.PageKey = PageKey = {}));
 var LOBBYROOMNAME = 'Lobby';
 
@@ -996,8 +1001,33 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             ActivePage: PageKey.Home,
             PlayerName: '',
             NewChatMsgVal: '',
-            LobbyMembers: [],
-            ChatMsgs: []
+            ChatMsgs: [],
+            PlayerData: []
+        };
+        //Get the active Player using the PlayerName...
+        _this.GetActivePlayer = function () {
+            return _this.state.PlayerData.find(function (_Player) {
+                return _Player.Username === _this.state.PlayerName;
+            });
+        };
+        _this.EmitLobbyAction = function (_LobbyAction) {
+            console.log(_LobbyAction.ActionName + ' ' + _LobbyAction.SourceSocketID + '->' + _LobbyAction.TargetSocketID);
+            _this.mSocket.emit('lobby_action', _LobbyAction);
+        };
+        //Updates application state based on new data from the server...
+        _this.UpdateAppStateFromServerData = function (e) {
+            if (!e.IsOpSuccess) {
+                alert(e.Message);
+                return;
+            }
+            //Update ChatMsgs...
+            var _NewChatMsgs = _this.state.ChatMsgs.slice();
+            _NewChatMsgs.push({ Username: 'SYSTEM', Message: e.Message, AddedOn: new Date() });
+            //Update State...
+            _this.setState({
+                PlayerData: e.PlayerData,
+                ChatMsgs: _NewChatMsgs
+            });
         };
         //Nav Component Handler(s)...
         _this.handleNavAction = function (pageKey) {
@@ -1015,17 +1045,29 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
         };
         _this.handleNameSubmitEvent = function (e) {
             if (_this.state.PlayerName === '') {
-                _this.state.PlayerName = 'Anonymous' + Math.floor(Math.random() * 10000);
+                _this.setState({
+                    PlayerName: 'Anonymous' + Math.floor(Math.random() * 10000)
+                });
             }
+            var _JoinPayload = { RoomName: LOBBYROOMNAME, Username: _this.state.PlayerName };
+            console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
+            _this.mSocket.emit('join_room', _JoinPayload);
             _this.setState({
                 ActivePage: PageKey.Lobby
             });
         };
         //Lobby Component Handler(s)...
-        _this.handleLobbyLoad = function () {
-            var _JoinPayload = { room: LOBBYROOMNAME, username: _this.state.PlayerName };
-            console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
-            _this.mSocket.emit('join_room', _JoinPayload);
+        _this.handleLobbyInvite = function (e) {
+            var _Payload = { ActionName: 'invite', SourceSocketID: _this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
+            _this.EmitLobbyAction(_Payload);
+        };
+        _this.handleLobbyUninvite = function (e) {
+            var _Payload = { ActionName: 'uninvite', SourceSocketID: _this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
+            _this.EmitLobbyAction(_Payload);
+        };
+        _this.handleLobbyPlay = function (e) {
+            var _Payload = { ActionName: 'play', SourceSocketID: _this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
+            _this.EmitLobbyAction(_Payload);
         };
         _this.handleLobbyMsgChangeEvent = function (e) {
             _this.setState({
@@ -1033,7 +1075,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             });
         };
         _this.handleLobbyMsgSubmitEvent = function (e) {
-            var _ChatPayload = { room: LOBBYROOMNAME, username: _this.state.PlayerName, message: _this.state.NewChatMsgVal };
+            var _ChatPayload = { RoomName: LOBBYROOMNAME, Username: _this.state.PlayerName, Message: _this.state.NewChatMsgVal };
             console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
             _this.mSocket.emit('send_message', _ChatPayload);
         };
@@ -1044,59 +1086,39 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             console.log.apply(console, e);
         });
         //Handle web socket event for join_room_response...
-        _this.mSocket.on('join_room_response', function (e) {
+        _this.mSocket.on('error_response', function (e) {
             //Logging and Error Handling...
-            console.log('join_room_response: ' + JSON.stringify(e));
-            if (e.result === 'fail') {
-                alert(e.message);
+            console.log('error_response: ' + JSON.stringify(e));
+            if (!e.IsOpSuccess && e.ActionName && e.Message) {
+                alert(e.ActionName + ': ' + e.Message);
                 return;
             }
-            // //Update LobbyMembers...
-            // let _NewLobbyMembers: LobbyMember[] = this.state.LobbyMembers.slice();
-            // _NewLobbyMembers.push({ timestamp:Date.now(), socketid:e.socketid, username:e.username });
-            //Update ChatMsgs...
-            var _NewChatMsgs = _this.state.ChatMsgs.slice();
-            _NewChatMsgs.push({ timestamp: new Date(), username: e.username, message: 'Has joined the ' + LOBBYROOMNAME + '!' });
-            //Update State...
-            _this.setState({
-                LobbyMembers: e.members,
-                ChatMsgs: _NewChatMsgs
-            });
         });
-        //Handle web socket event for join_room_response...
-        _this.mSocket.on('disconnect_response', function (e) {
+        //Handle web socket event for player_disconnect...
+        _this.mSocket.on('update_broadcast', function (e) {
             //Logging and Error Handling...
-            console.log('disconnect_response: ' + JSON.stringify(e));
-            //Update ChatMsgs...
-            var _NewChatMsgs = _this.state.ChatMsgs.slice();
-            _NewChatMsgs.push({ timestamp: new Date(), username: e.username, message: 'Has left the ' + LOBBYROOMNAME + '!' });
-            //Update State...
-            _this.setState({
-                LobbyMembers: e.members,
-                ChatMsgs: _NewChatMsgs
-            });
+            console.log('update_broadcast: ' + JSON.stringify(e));
+            _this.UpdateAppStateFromServerData(e);
         });
-        //Handle web socket response for send_message...
-        _this.mSocket.on('send_message_response', function (e) {
+        //Handle web socket response for send_message_broadcast...
+        _this.mSocket.on('send_message_broadcast', function (e) {
             //Logging and Error Handling...
-            console.log('send_message_response: ' + JSON.stringify(e));
-            if (e.result === 'fail') {
-                alert(e.message);
-                return;
+            console.log('send_message_broadcast: ' + JSON.stringify(e));
+            if (e.IsOpSuccess) {
+                //Update NewChatMsgVal to '' if the message received is from the current/active player...
+                var _NewChatMsgVal = _this.state.NewChatMsgVal;
+                if (e.Username === _this.state.PlayerName) {
+                    _NewChatMsgVal = '';
+                }
+                //Update ChatMsgs...
+                var _NewChatMsgs = _this.state.ChatMsgs.slice();
+                _NewChatMsgs.push({ Username: e.Username, Message: e.Message, AddedOn: new Date() });
+                //Update State...
+                _this.setState({
+                    NewChatMsgVal: _NewChatMsgVal,
+                    ChatMsgs: _NewChatMsgs
+                });
             }
-            //Update NewChatMsgVal to '' if the message received is from the current/active player...
-            var _NewChatMsgVal = _this.state.NewChatMsgVal;
-            if (e.username === _this.state.PlayerName) {
-                _NewChatMsgVal = '';
-            }
-            //Update ChatMsgs...
-            var _NewChatMsgs = _this.state.ChatMsgs.slice();
-            _NewChatMsgs.push({ timestamp: new Date(), username: e.username, message: e.message });
-            //Update State...
-            _this.setState({
-                NewChatMsgVal: _NewChatMsgVal,
-                ChatMsgs: _NewChatMsgs
-            });
         });
         return _this;
     }
@@ -1120,7 +1142,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
                     case PageKey.Name:
                         return _react3.default.createElement(_Name.Name, { onNavigate: _this2.handleNavAction, onNameChange: _this2.handleNameChangeEvent, onNameSubmit: _this2.handleNameSubmitEvent, PlayerName: _this2.state.PlayerName });
                     case PageKey.Lobby:
-                        return _react3.default.createElement("div", null, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onLoad: _this2.handleLobbyLoad, PlayerName: _this2.state.PlayerName, LobbyMembers: _this2.state.LobbyMembers }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgChange: _this2.handleLobbyMsgChangeEvent, onMsgSubmit: _this2.handleLobbyMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
+                        return _react3.default.createElement("div", { id: "LobbyChat" }, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onInvite: _this2.handleLobbyInvite, onUninvite: _this2.handleLobbyUninvite, onPlay: _this2.handleLobbyPlay, GetActivePlayer: _this2.GetActivePlayer, LobbyRoomName: LOBBYROOMNAME, PlayerName: _this2.state.PlayerName, PlayerData: _this2.state.PlayerData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgChange: _this2.handleLobbyMsgChangeEvent, onMsgSubmit: _this2.handleLobbyMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
                     default:
                         return _react3.default.createElement(_Home.Home, { onNavigate: _this2.handleNavAction });
                 }
@@ -1264,8 +1286,8 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
     _createClass(Chat, [{
         key: 'render',
         value: function render() {
-            var ChatMsgs = this.props.ChatMsgs.map(function (_ChatMsg) {
-                return _react3.default.createElement("div", { key: _ChatMsg.timestamp.getMilliseconds(), className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.message));
+            var ChatMsgs = this.props.ChatMsgs.reverse().map(function (_ChatMsg) {
+                return _react3.default.createElement("div", { key: _ChatMsg.AddedOn.getMilliseconds(), className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.Username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.Message));
             });
             return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.props.onMsgChange })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.props.onMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs))));
         }
@@ -1533,17 +1555,18 @@ function _wrapComponent(id) {
     };
 } //import Classnames from 'classnames';
 
+//import { IDictionary } from './App';
+
 
 var Lobby = exports.Lobby = _wrapComponent('Lobby')(function (_React$Component) {
     _inherits(Lobby, _React$Component);
 
-    function Lobby(props) {
+    function Lobby() {
         _classCallCheck(this, Lobby);
 
-        var _this = _possibleConstructorReturn(this, (Lobby.__proto__ || Object.getPrototypeOf(Lobby)).call(this, props));
+        var _this = _possibleConstructorReturn(this, (Lobby.__proto__ || Object.getPrototypeOf(Lobby)).apply(this, arguments));
 
         _this.state = {};
-        _this.props.onLoad();
         return _this;
     }
 
@@ -1552,9 +1575,20 @@ var Lobby = exports.Lobby = _wrapComponent('Lobby')(function (_React$Component) 
         value: function render() {
             var _this2 = this;
 
-            var LobbyMembers = this.props.LobbyMembers.map(function (_LobbyMember) {
-                if (_LobbyMember.username !== _this2.props.PlayerName) {
-                    return _react3.default.createElement("div", { key: _LobbyMember.socketid, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _LobbyMember.username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right" }, "Invite")));
+            var ActivePlayer = this.props.GetActivePlayer();
+            var LobbyMembers = this.props.PlayerData.map(function (_Player) {
+                //Constant Filter: NOT yourself and IN the Lobby...
+                if (_Player.Username !== _this2.props.PlayerName && _Player.CurrRoomName === _this2.props.LobbyRoomName) {
+                    if (ActivePlayer.InvitesTo.indexOf(_Player.SocketID) >= 0) {
+                        //InvitedTo Case => Uninvite...
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onUninvite, className: "btn btn-warning pull-right uninvite-button" }, "Uninvite")));
+                    } else if (ActivePlayer.InvitedBy.indexOf(_Player.SocketID) >= 0) {
+                        //InvitedBy Case => Play...
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onPlay, className: "btn btn-success pull-right play-button" }, "Play")));
+                    } else {
+                        //Std Case => Invite...
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onInvite, className: "btn btn-primary pull-right invite-button" }, "Invite")));
+                    }
                 }
             });
             return _react3.default.createElement("div", { className: "LobbyComponent" }, _react3.default.createElement("div", { className: "welcome row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h1", { className: "text-center" }, "Lobby"), _react3.default.createElement("h2", null, "Welcome, ", _react3.default.createElement("span", { id: "username" }, this.props.PlayerName), "!"))), _react3.default.createElement("div", { id: "players" }, LobbyMembers));
@@ -10574,7 +10608,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "", "", {"version":3,"sources":[],"names":[],"mappings":"","file":"Chat.less","sourceRoot":""}]);
+exports.push([module.i, "#NewMessage {\n  width: 100%;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less"],"names":[],"mappings":"AAAA;EACI,YAAA;CCCH","file":"Chat.less","sourcesContent":["#NewMessage {\n    width:100%;\n}","#NewMessage {\n  width: 100%;\n}\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -10604,7 +10638,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "#NewMessage {\n  width: 100%;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less"],"names":[],"mappings":"AAAA;EACI,YAAA;CCCH","file":"Lobby.less","sourcesContent":["#NewMessage {\n    width:100%;\n}","#NewMessage {\n  width: 100%;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".LobbyMember button {\n  min-width: 100px;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;CCCH","file":"Lobby.less","sourcesContent":[".LobbyMember button {\n    min-width: 100px;\n}",".LobbyMember button {\n  min-width: 100px;\n}\n"],"sourceRoot":""}]);
 
 // exports
 
