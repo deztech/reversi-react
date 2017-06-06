@@ -48,18 +48,7 @@ var _mIsDataDirty = false;
 //Init Data...
 var _mData = {};
 _mData.Players = [];
-
-//Try to read data from server data file on start-up...
-_mJsonFile.readFile(SAVEFILENAME, function(err, obj) {
-    if(!err) {
-        //Load Data (not currently supported)...
-        //_mData = obj;
-        console.dir(_mData);
-    }
-    else {
-        console.error(err);
-    }
-});
+_mData.Games = [];
 /*
 Regarding ^^^ ...
 _mData => Server-side database of all application data in the following structure...
@@ -69,11 +58,33 @@ _mData.Players => Player[]
   Player => SocketID (PK: string), 
             Username (string), 
             CurrRoomName (string), 
-            CurrOpponent (string), 
+            NextRoomName (string), 
             InvitedTo (string[]), 
             InvitedBy (string[]), 
             AddedOn (Date)
+
+_mData.Games => Game[]
+  Game =>   RoomName (string), 
+            PlayerDarkSocketID (string; Dark goes first and moves on odd CurrMoveNum values),
+            PlayerLightSocketID (string; Light goes second and moves on even CurrMoveNum values),
+            CurrScoreDark (number),
+            CurrScoreLight (number),
+            CurrMoveNum (number; starts at 1),
+            BoardArray (string[][]), 
+            AddedOn (Date)
 */
+
+//Try to read data from server data file on start-up...
+_mJsonFile.readFile(SAVEFILENAME, function(err, obj) {
+    if(!err) {
+        //Load Data (not currently supported since the changing SocketID values makes this tricky since we'd need to remap SocketIDs after any restart/reconnect anyways!)...
+        //_mData = obj;
+        console.dir(obj);
+    }
+    else {
+        console.error(err);
+    }
+});
 
 //Save the server data to a JSON file every so often IFF the data is dirty...
 setInterval(function(){
@@ -84,6 +95,28 @@ setInterval(function(){
         });
     }
 }, SAVEINTERVALMS);
+
+var _mTOKENENUM = Object.freeze({ EMPTY:                'token-empty.gif', 
+                                  EMPTYtoDARK:          'token-empty-fading-into-dark.gif', 
+                                  EMPTYtoLIGHT:         'token-empty-fading-into-light.gif', 
+                                  DARK:                 'token-dark-static.gif', 
+                                  DARKfromLIGHT:        'token-light-flipping-to-dark.gif', 
+                                  LIGHT:                'token-light-static.gif', 
+                                  LIGHTfromDARK:        'token-dark-flipping-to-light.gif', 
+                                  ERROR:                'token-error.gif' });
+
+//Function to create a dynamic, multi-dimensional array (from: https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938)...
+function CreateArray(length) {
+    var arr = new Array(length || 0),
+        i = length;
+
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        while(i--) arr[length-1 - i] = CreateArray.apply(this, args);
+    }
+
+    return arr;
+}
 
 //Gets a Player by SocketID...
 function GetPlayerBySocketID(_SocketID) {
@@ -109,7 +142,7 @@ function AddPlayer(_SocketID, _Username, _RoomName) {
         SocketID:_SocketID, 
         Username:_Username, 
         CurrRoomName:_RoomName,
-        CurrOpponent:'', 
+        NextRoomName:'', 
         InvitesTo:[], 
         InvitedBy:[], 
         AddedOn:Date.now()
@@ -128,8 +161,66 @@ function RemovePlayer(_SocketID) {
         return _Player.SocketID !== _SocketID;
     });
 
+    //Then update the Players array by filtering each Player item's InvitedTo + InvitedBy arrays...
+    _mData.Players.forEach(function(_Player) {
+        //Filter out the unwanted SocketID from the InvitesTo array...
+        if(_Player.InvitesTo) {
+            _Player.InvitesTo = _Player.InvitesTo.filter(function(_ItemValue){
+                return _ItemValue !== _SocketID;
+            });
+        }
+        
+        //Filter out the unwanted SocketID from the InvitesBy array...
+        if(_Player.InvitesBy) {
+            _Player.InvitesBy = _Player.InvitesBy.filter(function(_ItemValue){
+                return _ItemValue !== _SocketID;
+            });
+        }
+    });
+
     //Mark data as dirty (updated)...
     _mIsDataDirty = true;
+}
+
+//Gets a Game by RoomName...
+function GetGameByRoomName(_RoomName) {
+    if(_RoomName === LOBBYROOMNAME) return;
+
+    var _Game = _mData.Games.find(function(_Game){
+        return _Game.RoomName === _RoomName;
+    });
+
+    return _Game;
+}
+
+//Initializes and Returns a New Game Object...
+function GetNewGame(_NewRoomForGame, _P1SocketID, _P2SocketID) {
+
+    //Init and set the basics...
+    var _Game = {};
+    _Game.RoomName = _NewRoomForGame;
+    _Game.CurrScoreDark = 2;
+    _Game.CurrScoreLight = 2;
+    _Game.CurrMoveNum = 1;
+    _Game.BoardArray = CreateArray(8, 8);
+    _Game.BoardArray[3][3] = _mTOKENENUM.EMPTYtoLIGHT;
+    _Game.BoardArray[4][4] = _mTOKENENUM.EMPTYtoLIGHT;
+    _Game.BoardArray[3][4] = _mTOKENENUM.EMPTYtoDARK;
+    _Game.BoardArray[4][3] = _mTOKENENUM.EMPTYtoDARK;
+    _Game.AddedOn = Date.now();
+
+    //Randomly choose who is Dark and goes first...
+    if(Math.random() < 0.5) {
+        _Game.PlayerDarkSocketID = _P1SocketID;
+        _Game.PlayerLightSocketID = _P2SocketID;
+    }
+    else {
+        _Game.PlayerDarkSocketID = _P2SocketID;
+        _Game.PlayerLightSocketID = _P1SocketID;
+    }
+
+    //Return the new game object...
+    return _Game;
 }
 
 //////////////////////////////// WEB SOCKET SETUP ////////////////////////////////
@@ -157,10 +248,15 @@ _mIO.sockets.on('connection', function (_Socket) {
                 RemovePlayer(_Player.SocketID);
             
                 //Respond...
+                var _Message;
+                if(_Player.CurrRoomName === LOBBYROOMNAME) _Message = _Player.Username + ' has left the ' + LOBBYROOMNAME + '.';
+                else _Message = _Player.Username + ' has left the game.';
+
                 var _SuccessData = {
                     IsOpSuccess: true,
-                    Message: _Player.Username + ' has left the ' + _Player.CurrRoomName + '.',
-                    PlayerData: GetPlayersByRoomName(_Player.CurrRoomName)
+                    Message: _Message,
+                    PlayerData: GetPlayersByRoomName(_Player.CurrRoomName),
+                    GameData: GetGameByRoomName(_Player.CurrRoomName)
                 }
                 log('update_broadcast: ' + JSON.stringify(_SuccessData));
                 _mIO.in(_Player.CurrRoomName).emit('update_broadcast', _SuccessData);
@@ -208,17 +304,32 @@ _mIO.sockets.on('connection', function (_Socket) {
             return;
         }
 
-        //Remove any matching Player from the data...
-        RemovePlayer(_Socket.id);
+        //Look for an existing Player record...
+        var _ExistingPlayer = GetPlayerBySocketID(_Socket.id);
 
-        //Then add the Player to the data...
-        AddPlayer(_Socket.id, _Username, _RoomName);
+        if(_ExistingPlayer) {
+            //If we have an existing Player not in the newly requested RoomName, then leave their old room and update their CurrRoomName value...
+            if(_ExistingPlayer.CurrRoomName !== _RoomName) {
+                //_Socket.leave(_ExistingPlayer.CurrRoomName);  //ToDo: Disabling this LEAVE since it seems to disconnect the Socket.
+                _ExistingPlayer.CurrRoomName = _RoomName;
+            }
+
+            //Always clear any NextRoomName value when joining a room...
+            _ExistingPlayer.NextRoomName = '';
+            _mIsDataDirty = true;
+        }
+        else {
+            //Else, add the new Player to the data...
+            AddPlayer(_Socket.id, _Username, _RoomName);
+        }
+
         _Message = _RoomName + ' was joined by ' + _Username + '.';
 
         var _SuccessData = {
             IsOpSuccess: true,
             Message: _Message,
-            PlayerData: GetPlayersByRoomName(_RoomName)
+            PlayerData: GetPlayersByRoomName(_RoomName),
+            GameData: GetGameByRoomName(_RoomName)
         }
         log('update_broadcast: ' + JSON.stringify(_SuccessData));
         _mIO.sockets.in(_RoomName).emit('update_broadcast', _SuccessData);
@@ -249,21 +360,38 @@ _mIO.sockets.on('connection', function (_Socket) {
 
         switch(_Payload.ActionName) {
             case 'invite':
+                //Add the invite data...
                 _SourcePlayer.InvitesTo.push(_TargetPlayer.SocketID);
                 _TargetPlayer.InvitedBy.push(_SourcePlayer.SocketID);
                 _Message = _SourcePlayer.Username + ' invites ' + _TargetPlayer.Username + ' to a game.';
                 _mIsDataDirty = true;
                 break;
+
             case 'uninvite':
+                //Filter out the invite data to uninvite...
                 _SourcePlayer.InvitesTo = _SourcePlayer.InvitesTo.filter(function(_SocketID) { return _SocketID !== _TargetPlayer.SocketID; });
                 _TargetPlayer.InvitedBy = _TargetPlayer.InvitedBy.filter(function(_SocketID) { return _SocketID !== _SourcePlayer.SocketID; });
                 _Message = _SourcePlayer.Username + ' uninvites ' + _TargetPlayer.Username + ' to a game.';
                 _mIsDataDirty = true;
                 break;
+
             case 'play':
-                //ToDo: ???
-                _Message = _SourcePlayer.Username + ' will play ' + _TargetPlayer.Username + '.';
+                //Create a unique, new RoomName for the Game...
+                var _NewRoomForGame = _SourcePlayer.Username + '_' + _TargetPlayer.Username + '_' + Date.now();
+                _SourcePlayer.NextRoomName = _NewRoomForGame;
+                _TargetPlayer.NextRoomName = _NewRoomForGame;
+                _Message = _SourcePlayer.Username + ' is playing ' + _TargetPlayer.Username + '.';
+                
+                //Also remove any relevant 'invite' data by essentially running the 'uninvite' filters above...
+                _SourcePlayer.InvitesTo = _SourcePlayer.InvitesTo.filter(function(_SocketID) { return _SocketID !== _TargetPlayer.SocketID; });
+                _TargetPlayer.InvitedBy = _TargetPlayer.InvitedBy.filter(function(_SocketID) { return _SocketID !== _SourcePlayer.SocketID; });
+
+                //Add a newly initialized Game to our server data...
+                _mData.Games.push(GetNewGame(_NewRoomForGame, _SourcePlayer.SocketID, _TargetPlayer.SocketID));
+
+                //Mark the data as dirty...
                 _mIsDataDirty = true;
+
                 break;
         }
 

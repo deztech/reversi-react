@@ -44,3 +44,6 @@ jspm_packages
 ### # React/Webpack Output
 ### /app.js
 ### /app.js.map
+
+# The server data JSON output...
+serverdata.json

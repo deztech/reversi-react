@@ -11,6 +11,7 @@ import { Rules } from './Rules';
 import { Name } from './Name';
 import { Lobby } from './Lobby';
 import { Chat } from './Chat';
+import { Game } from './Game';
 
 import './lib/reset.less';
 import './App.less';
@@ -30,10 +31,29 @@ export interface IPlayer {
     SocketID: string;
     Username: string;
     CurrRoomName: string;
-    CurrOpponent: string;
+    NextRoomName: string;
     InvitesTo: string[];
     InvitedBy: string[];
     AddedOn: Date;
+}
+
+//Defines the Game data structure...
+export interface IGame {
+    RoomName: string;
+    PlayerDarkSocketID: string;
+    PlayerLightSocketID: string;
+    CurrScoreDark: number;
+    CurrScoreLight: number;
+    CurrMoveNum: number;
+    BoardArray: any[][];    //ToDo: This should probably be of type IBoardLocation once things are more defined.
+    AddedOn: Date;
+}
+
+//Defines a single Location (square) on the Game's BoardArray...
+export interface IBoardLocation {
+    X: number;
+    Y: number;
+    ToDoSomeStateValuesGoHere: any;
 }
 
 //Interface of what a chat message is...
@@ -49,6 +69,7 @@ interface IServerDataResponse {
     ActionName: string;
     Message: string;
     PlayerData: IPlayer[];
+    GameData: IGame[];
 }
 
 //Sent to Server when the user takes a Lobby Action...
@@ -157,9 +178,14 @@ export class App extends React.Component<{}, AppState> {
         PlayerData: []
     } as AppState;
 
-    //Get the active Player using the PlayerName...
+    //Get the active Player using the PlayerName from the AppState...
     public GetActivePlayer = () => {
-        return this.state.PlayerData.find(_Player => _Player.Username === this.state.PlayerName);
+        return this.GetActivePlayerFromPlayerArray(this.state.PlayerData);
+    }
+
+    //Get the active Player using the PlayerName from the AppState...
+    public GetActivePlayerFromPlayerArray = (_PlayerData:IPlayer[]) => {
+        return _PlayerData.find(_Player => _Player.Username === this.state.PlayerName);
     }
 
     private EmitLobbyAction = (_LobbyAction:ILobbyAction) => {
@@ -177,12 +203,28 @@ export class App extends React.Component<{}, AppState> {
         //Update ChatMsgs...
         let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
         _NewChatMsgs.push({ Username:'SYSTEM', Message:e.Message, AddedOn:new Date() });
+
+        //Get the Active Player and Current Active PageKey...
+        let _ActivePlayer = this.GetActivePlayerFromPlayerArray(e.PlayerData);
+        let _CurrPageKey = this.state.ActivePage;
+
+        //If the ActivePlayer isn't in the Lobby, then go to the Game "page"...
+        if(_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== LOBBYROOMNAME) {
+            _CurrPageKey = PageKey.Game;
+        }
         
         //Update State...
         this.setState({
+            ActivePage: _CurrPageKey,
             PlayerData: e.PlayerData,
             ChatMsgs: _NewChatMsgs
         });
+
+        if(_ActivePlayer.NextRoomName !== '') {
+            let _JoinPayload: IJoinRoom = { RoomName: _ActivePlayer.NextRoomName, Username: this.state.PlayerName };
+            console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
+            this.mSocket.emit('join_room', _JoinPayload);
+        }
     }
     
     //Nav Component Handler(s)...
@@ -268,6 +310,17 @@ export class App extends React.Component<{}, AppState> {
                                    LobbyRoomName={LOBBYROOMNAME}
                                    PlayerName={this.state.PlayerName} 
                                    PlayerData={this.state.PlayerData} />
+                            <Chat  onNavigate={this.handleNavAction} 
+                                   onMsgSubmit={this.handleChatMsgSubmitEvent} 
+                                   PlayerName={this.state.PlayerName} 
+                                   NewChatMsgVal={this.state.NewChatMsgVal} 
+                                   ChatMsgs={this.state.ChatMsgs} />
+                           </div>;
+
+                case PageKey.Game:
+                    return <div id="GameChat">
+                            <Game  onNavigate={this.handleNavAction} 
+                                   PlayerName={this.state.PlayerName} />
                             <Chat  onNavigate={this.handleNavAction} 
                                    onMsgSubmit={this.handleChatMsgSubmitEvent} 
                                    PlayerName={this.state.PlayerName} 
