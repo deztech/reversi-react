@@ -323,16 +323,29 @@ _mIO.sockets.on('connection', function (_Socket) {
             AddPlayer(_Socket.id, _Username, _RoomName);
         }
 
-        _Message = _RoomName + ' was joined by ' + _Username + '.';
+        if(_RoomName === LOBBYROOMNAME) _Message = _RoomName + ' joined by ' + _Username + '.';
+        else                            _Message = 'Game joined by ' + _Username + '.';
 
+        //Always update the Lobby!...
         var _SuccessData = {
             IsOpSuccess: true,
             Message: _Message,
-            PlayerData: GetPlayersByRoomName(_RoomName),
-            GameData: GetGameByRoomName(_RoomName)
+            PlayerData: GetPlayersByRoomName(LOBBYROOMNAME)
         }
         log('update_broadcast: ' + JSON.stringify(_SuccessData));
-        _mIO.sockets.in(_RoomName).emit('update_broadcast', _SuccessData);
+        _mIO.sockets.in(LOBBYROOMNAME).emit('update_broadcast', _SuccessData);
+
+        //If the RoomName is NOT the Lobby, update that room also...
+        if(_RoomName !== LOBBYROOMNAME) {
+            _SuccessData = {
+                IsOpSuccess: true,
+                Message: _Message,
+                PlayerData: GetPlayersByRoomName(_RoomName),
+                GameData: GetGameByRoomName(_RoomName)
+            }
+            log('update_broadcast: ' + JSON.stringify(_SuccessData));
+            _mIO.sockets.in(_RoomName).emit('update_broadcast', _SuccessData);
+        }
     });
 
     //_Payload: ActionName, SourceSocketID, TargetSocketID
