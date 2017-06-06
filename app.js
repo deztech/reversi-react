@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "554430ed8aa051938088"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "e3626e930b5789fef1ba"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -1069,13 +1069,8 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             var _Payload = { ActionName: 'play', SourceSocketID: _this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
             _this.EmitLobbyAction(_Payload);
         };
-        _this.handleLobbyMsgChangeEvent = function (e) {
-            _this.setState({
-                NewChatMsgVal: e.currentTarget.value
-            });
-        };
-        _this.handleLobbyMsgSubmitEvent = function (e) {
-            var _ChatPayload = { RoomName: LOBBYROOMNAME, Username: _this.state.PlayerName, Message: _this.state.NewChatMsgVal };
+        _this.handleChatMsgSubmitEvent = function (e) {
+            var _ChatPayload = { RoomName: LOBBYROOMNAME, Username: _this.state.PlayerName, Message: e.currentTarget.value };
             console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
             _this.mSocket.emit('send_message', _ChatPayload);
         };
@@ -1105,19 +1100,21 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             //Logging and Error Handling...
             console.log('send_message_broadcast: ' + JSON.stringify(e));
             if (e.IsOpSuccess) {
-                //Update NewChatMsgVal to '' if the message received is from the current/active player...
-                var _NewChatMsgVal = _this.state.NewChatMsgVal;
-                if (e.Username === _this.state.PlayerName) {
-                    _NewChatMsgVal = '';
-                }
                 //Update ChatMsgs...
                 var _NewChatMsgs = _this.state.ChatMsgs.slice();
                 _NewChatMsgs.push({ Username: e.Username, Message: e.Message, AddedOn: new Date() });
                 //Update State...
-                _this.setState({
-                    NewChatMsgVal: _NewChatMsgVal,
-                    ChatMsgs: _NewChatMsgs
-                });
+                if (e.Username === _this.state.PlayerName) {
+                    //Update NewChatMsgVal to '' if the message received is from the current/active player...
+                    _this.setState({
+                        NewChatMsgVal: '',
+                        ChatMsgs: _NewChatMsgs
+                    });
+                } else {
+                    _this.setState({
+                        ChatMsgs: _NewChatMsgs
+                    });
+                }
             }
         });
         return _this;
@@ -1142,7 +1139,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
                     case PageKey.Name:
                         return _react3.default.createElement(_Name.Name, { onNavigate: _this2.handleNavAction, onNameChange: _this2.handleNameChangeEvent, onNameSubmit: _this2.handleNameSubmitEvent, PlayerName: _this2.state.PlayerName });
                     case PageKey.Lobby:
-                        return _react3.default.createElement("div", { id: "LobbyChat" }, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onInvite: _this2.handleLobbyInvite, onUninvite: _this2.handleLobbyUninvite, onPlay: _this2.handleLobbyPlay, GetActivePlayer: _this2.GetActivePlayer, LobbyRoomName: LOBBYROOMNAME, PlayerName: _this2.state.PlayerName, PlayerData: _this2.state.PlayerData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgChange: _this2.handleLobbyMsgChangeEvent, onMsgSubmit: _this2.handleLobbyMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
+                        return _react3.default.createElement("div", { id: "LobbyChat" }, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onInvite: _this2.handleLobbyInvite, onUninvite: _this2.handleLobbyUninvite, onPlay: _this2.handleLobbyPlay, GetActivePlayer: _this2.GetActivePlayer, LobbyRoomName: LOBBYROOMNAME, PlayerName: _this2.state.PlayerName, PlayerData: _this2.state.PlayerData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgSubmit: _this2.handleChatMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
                     default:
                         return _react3.default.createElement(_Home.Home, { onNavigate: _this2.handleNavAction });
                 }
@@ -1279,17 +1276,30 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Chat.__proto__ || Object.getPrototypeOf(Chat)).apply(this, arguments));
 
-        _this.state = {};
+        _this.state = {
+            MsgVal: _this.props.NewChatMsgVal
+        };
+        _this.onLocalMsgChange = function (e) {
+            _this.setState({
+                MsgVal: e.currentTarget.value
+            });
+        };
+        _this.onLocalMsgSubmit = function (e) {
+            _this.props.onMsgSubmit(e);
+            _this.setState({
+                MsgVal: ''
+            });
+        };
         return _this;
     }
 
     _createClass(Chat, [{
         key: 'render',
         value: function render() {
-            var ChatMsgs = this.props.ChatMsgs.reverse().map(function (_ChatMsg) {
+            var ChatMsgs = this.props.ChatMsgs.slice().reverse().map(function (_ChatMsg) {
                 return _react3.default.createElement("div", { key: _ChatMsg.AddedOn.getMilliseconds(), className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.Username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.Message));
             });
-            return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.props.onMsgChange })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.props.onMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs))));
+            return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-8" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.onLocalMsgChange, value: this.state.MsgVal })), _react3.default.createElement("div", { className: "col-4" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.onLocalMsgSubmit, value: this.state.MsgVal }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs))));
         }
     }]);
 
@@ -1581,13 +1591,13 @@ var Lobby = exports.Lobby = _wrapComponent('Lobby')(function (_React$Component) 
                 if (_Player.Username !== _this2.props.PlayerName && _Player.CurrRoomName === _this2.props.LobbyRoomName) {
                     if (ActivePlayer.InvitesTo.indexOf(_Player.SocketID) >= 0) {
                         //InvitedTo Case => Uninvite...
-                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onUninvite, className: "btn btn-warning pull-right uninvite-button" }, "Uninvite")));
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-8 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-4 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onUninvite, className: "btn btn-warning pull-right uninvite-button" }, "Uninvite")));
                     } else if (ActivePlayer.InvitedBy.indexOf(_Player.SocketID) >= 0) {
                         //InvitedBy Case => Play...
-                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onPlay, className: "btn btn-success pull-right play-button" }, "Play")));
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-8 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-4 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onPlay, className: "btn btn-success pull-right play-button" }, "Play")));
                     } else {
                         //Std Case => Invite...
-                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-9 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-3 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onInvite, className: "btn btn-primary pull-right invite-button" }, "Invite")));
+                        return _react3.default.createElement("div", { key: _Player.SocketID, className: "LobbyMember row" }, _react3.default.createElement("div", { className: "col-8 no-gutters" }, _react3.default.createElement("strong", null, _Player.Username)), _react3.default.createElement("div", { className: "col-4 no-gutters" }, _react3.default.createElement("button", { type: "button", value: _Player.SocketID, onClick: _this2.props.onInvite, className: "btn btn-primary pull-right invite-button" }, "Invite")));
                     }
                 }
             });
@@ -10608,7 +10618,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "#NewMessage {\n  width: 100%;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less"],"names":[],"mappings":"AAAA;EACI,YAAA;CCCH","file":"Chat.less","sourcesContent":["#NewMessage {\n    width:100%;\n}","#NewMessage {\n  width: 100%;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, "#NewMessage {\n  width: 100%;\n}\n.ChatComponent .newmessage button {\n  width: 100%;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Chat.less"],"names":[],"mappings":"AAAA;EACI,YAAA;CCCH;ADED;EACI,YAAA;CCAH","file":"Chat.less","sourcesContent":["#NewMessage {\n    width:100%;\n}\n\n.ChatComponent .newmessage button {\n    width:100%;\n}","#NewMessage {\n  width: 100%;\n}\n.ChatComponent .newmessage button {\n  width: 100%;\n}\n"],"sourceRoot":""}]);
 
 // exports
 
@@ -10638,7 +10648,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, ".LobbyMember button {\n  min-width: 100px;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less"],"names":[],"mappings":"AAAA;EACI,iBAAA;CCCH","file":"Lobby.less","sourcesContent":[".LobbyMember button {\n    min-width: 100px;\n}",".LobbyMember button {\n  min-width: 100px;\n}\n"],"sourceRoot":""}]);
+exports.push([module.i, ".LobbyMember button {\n  width: 100%;\n}\n", "", {"version":3,"sources":["C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less","C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/Lobby.less"],"names":[],"mappings":"AAAA;EACI,YAAA;CCCH","file":"Lobby.less","sourcesContent":[".LobbyMember button {\n    width: 100%;\n}",".LobbyMember button {\n  width: 100%;\n}\n"],"sourceRoot":""}]);
 
 // exports
 

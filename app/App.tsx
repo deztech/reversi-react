@@ -127,21 +127,23 @@ export class App extends React.Component<{}, AppState> {
             //Logging and Error Handling...
             console.log('send_message_broadcast: ' + JSON.stringify(e));
             if (e.IsOpSuccess) {
-                //Update NewChatMsgVal to '' if the message received is from the current/active player...
-                let _NewChatMsgVal = this.state.NewChatMsgVal;
-                if(e.Username === this.state.PlayerName) {
-                    _NewChatMsgVal = '';
-                }
-
                 //Update ChatMsgs...
                 let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
                 _NewChatMsgs.push({ Username:e.Username, Message:e.Message, AddedOn:new Date() });
                 
                 //Update State...
-                this.setState({
-                    NewChatMsgVal: _NewChatMsgVal,
-                    ChatMsgs: _NewChatMsgs
-                });
+                if(e.Username === this.state.PlayerName) {
+                    //Update NewChatMsgVal to '' if the message received is from the current/active player...
+                    this.setState({
+                        NewChatMsgVal: '',
+                        ChatMsgs: _NewChatMsgs
+                    });
+                }
+                else {
+                    this.setState({
+                        ChatMsgs: _NewChatMsgs
+                    });
+                }
             }
         });
     }
@@ -231,14 +233,8 @@ export class App extends React.Component<{}, AppState> {
         this.EmitLobbyAction(_Payload);
     }
 
-    private handleLobbyMsgChangeEvent = (e: React.FormEvent<HTMLInputElement>) => {
-        this.setState({
-            NewChatMsgVal: e.currentTarget.value
-        });
-    }
-
-    private handleLobbyMsgSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
-        let _ChatPayload: ISendMessage = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName, Message: this.state.NewChatMsgVal };
+    private handleChatMsgSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
+        let _ChatPayload: ISendMessage = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName, Message: e.currentTarget.value };
         console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
         this.mSocket.emit('send_message', _ChatPayload);
     }
@@ -273,8 +269,7 @@ export class App extends React.Component<{}, AppState> {
                                    PlayerName={this.state.PlayerName} 
                                    PlayerData={this.state.PlayerData} />
                             <Chat  onNavigate={this.handleNavAction} 
-                                   onMsgChange={this.handleLobbyMsgChangeEvent} 
-                                   onMsgSubmit={this.handleLobbyMsgSubmitEvent} 
+                                   onMsgSubmit={this.handleChatMsgSubmitEvent} 
                                    PlayerName={this.state.PlayerName} 
                                    NewChatMsgVal={this.state.NewChatMsgVal} 
                                    ChatMsgs={this.state.ChatMsgs} />
