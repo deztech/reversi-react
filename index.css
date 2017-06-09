@@ -1,0 +1,51 @@
+.score-row span {
+    margin: auto;
+    padding: 2px 5px;
+    font-weight: bold;
+}
+
+.score-row .score-value {
+    font-size: 1.5em;
+}
+
+.score-row .player-curr {
+    border-bottom: 2px solid #006;
+}
+
+.score-row img {
+    max-width: 48px;
+    max-height: 48px;
+}
+
+.game-board {
+    display: inline-block;
+    border: 5px solid #999;
+}
+
+.board-row {
+    margin: 0 !important;
+    clear: both;
+}
+
+
+
+
+
+@media (min-width: 0) {
+  .board-col {
+      width: 32px;
+      height: 32px;
+  }
+}
+@media (min-width: 768px) {
+  .board-col {
+      width: 64px;
+      height: 64px;
+  }
+}
+.board-col {
+    background-color: #6a7baf;
+    border: 1px solid #333;
+    margin: 0;
+    padding: 2px;
+}

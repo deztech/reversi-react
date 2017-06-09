@@ -65,13 +65,20 @@ _mData.Players => Player[]
 
 _mData.Games => Game[]
   Game =>   RoomName (string), 
-            PlayerDarkSocketID (string; Dark goes first and moves on odd CurrMoveNum values),
-            PlayerLightSocketID (string; Light goes second and moves on even CurrMoveNum values),
+            PlayerDark (object:Player; Dark goes first),
+            PlayerLight (object:Player; Light goes second),
             CurrScoreDark (number),
             CurrScoreLight (number),
-            CurrMoveNum (number; starts at 1),
-            BoardArray (string[][]), 
+            CurrTurn (number; -1=Dark & 1=Light)
+            NumOptionsDark (number; the number of valid move options for Dark)
+            NumOptionsLight (number; the number of valid move options for Light)
+            BoardArray (object[][]; object is of 'type' BoardLocation), 
+            MovesArray (object => X, Y, CurrTurn),
+            PlayerExitedUsername (string),
             AddedOn (Date)
+
+  BoardLocation => OccupiedBy (number; -1=>Dark; 0=>Blank; 1=>Light),
+  
 */
 
 //Try to read data from server data file on start-up...
@@ -182,6 +189,28 @@ function RemovePlayer(_SocketID) {
     _mIsDataDirty = true;
 }
 
+function RemovePlayerFromGame(_SocketID) {
+    //Find any relevant Game the player was in...
+    var _GameIndex = _mData.Games.findIndex(function(_Game){
+        return _Game.PlayerDark.SocketID === _SocketID || _Game.PlayerLight.SocketID === _SocketID;
+    });
+
+    if(_GameIndex >= 0) {
+        //Game was found...
+        if(_mData.Games[_GameIndex].PlayerExitedUsername === '') {
+            //First player to exit, so just set the player as exited since there's still another player in the game...
+            _mData.Games[_GameIndex].PlayerExitedUsername = GetPlayerBySocketID(_SocketID).Username;
+        }
+        else {
+            //Second player to exit, so remove the Game from the GameData...
+            _mData.Games.splice(_GameIndex, 1);
+        }
+
+        //Mark data as dirty (updated)...
+        _mIsDataDirty = true;
+    }
+}
+
 //Gets a Game by RoomName...
 function GetGameByRoomName(_RoomName) {
     if(_RoomName === LOBBYROOMNAME) return;
@@ -194,33 +223,106 @@ function GetGameByRoomName(_RoomName) {
 }
 
 //Initializes and Returns a New Game Object...
-function GetNewGame(_NewRoomForGame, _P1SocketID, _P2SocketID) {
+function GetNewGame(_NewRoomForGame, _PlayerA, _PlayerB, _BoardSize) {
+
+    //Make sure we have a valid _BoardSize value...
+    if(typeof(_BoardSize) !== 'number' || _BoardSize < 8 || _BoardSize % 2 !== 0) {
+        _BoardSize = 8; //Default to 8!
+    }
+
+    var _StartingPoint = (_BoardSize / 2) - 1;  //ie: 8 => (8/2)-1 = 3 OR (10/2)-1 = 4
 
     //Init and set the basics...
     var _Game = {};
     _Game.RoomName = _NewRoomForGame;
     _Game.CurrScoreDark = 2;
     _Game.CurrScoreLight = 2;
-    _Game.CurrMoveNum = 1;
-    _Game.BoardArray = CreateArray(8, 8);
-    _Game.BoardArray[3][3] = _mTOKENENUM.EMPTYtoLIGHT;
-    _Game.BoardArray[4][4] = _mTOKENENUM.EMPTYtoLIGHT;
-    _Game.BoardArray[3][4] = _mTOKENENUM.EMPTYtoDARK;
-    _Game.BoardArray[4][3] = _mTOKENENUM.EMPTYtoDARK;
+    _Game.CurrTurn = -1;
+    _Game.NumOptionsDark = -1;
+    _Game.NumOptionsLight = -1;
+
+    //Set up the BoardArray...
+    _Game.BoardArray = CreateArray(_BoardSize, _BoardSize);
+    for(var x = 0; x < _BoardSize; x++) {
+        for(var y = 0; y < _BoardSize; y++) {
+            _Game.BoardArray[x][y] = GetBoardLocation(x, y, 0, -1);
+        }
+    }
+    _Game.BoardArray[_StartingPoint][_StartingPoint] = GetBoardLocation(_StartingPoint, _StartingPoint, 1, 0);
+    _Game.BoardArray[_StartingPoint+1][_StartingPoint+1] = GetBoardLocation(_StartingPoint+1, _StartingPoint+1, 1, 0);
+    _Game.BoardArray[_StartingPoint][_StartingPoint+1] = GetBoardLocation(_StartingPoint, _StartingPoint+1, -1, 0);
+    _Game.BoardArray[_StartingPoint+1][_StartingPoint] = GetBoardLocation(_StartingPoint+1, _StartingPoint, -1, 0);
+
+    //Init the MovesArray...
+    _Game.MovesArray = [];
+
     _Game.AddedOn = Date.now();
 
     //Randomly choose who is Dark and goes first...
     if(Math.random() < 0.5) {
-        _Game.PlayerDarkSocketID = _P1SocketID;
-        _Game.PlayerLightSocketID = _P2SocketID;
+        _Game.PlayerDark  = _PlayerA;
+        _Game.PlayerLight  = _PlayerB;
     }
     else {
-        _Game.PlayerDarkSocketID = _P2SocketID;
-        _Game.PlayerLightSocketID = _P1SocketID;
+        _Game.PlayerDark = _PlayerB;
+        _Game.PlayerLight = _PlayerA;
+    }
+
+    //Store a value for when a play exits...
+    _Game.PlayerExitedUsername = '';
+
+    _Game.ExecuteMove = function(_X, _Y) {
+        //Reset Animation Values...
+        this.BoardArray.forEach(function(_BoardArrayInner) {
+            _BoardArrayInner.forEach(function(_BoardLocation) {
+                if(_BoardLocation.X !== _X || _BoardLocation.Y !== _Y) {
+                    _BoardLocation.AnimationState = -1;
+                }
+            });
+        });
+                
+        //Perform BoardLocation Update...
+        this.BoardArray[_X][_Y] = GetBoardLocation(_X, _Y, this.CurrTurn, 0);
+        this.MovesArray.push({ X:_X, Y:_Y, CurrTurn:this.CurrTurn})
+        this.CurrTurn = _Game.CurrTurn * -1;
+
+        //Update Score Values...
+        this.CurrScoreDark = 0;
+        this.CurrScoreLight = 0;
+        for(var x = 0; x < this.BoardArray.length; x++) {
+            for(var y = 0; y < this.BoardArray.length; y++) {
+                //Sum the Scores...
+                if(_Game.BoardArray[x][y].OccupiedBy === -1) {
+                    this.CurrScoreDark++;
+                }
+                else if(_Game.BoardArray[x][y].OccupiedBy === 1) {
+                    this.CurrScoreLight++;
+                }
+            }
+        }
     }
 
     //Return the new game object...
     return _Game;
+}
+
+//Builds a BoardLocation object based on X (row), Y (column), OccupiedBy (-1=>Dark; 0=>Blank; 1=>Light), & AnimationState (-1=>None; 0=>New; 1+=>OrderOfAnimation)
+function GetBoardLocation(_X, _Y, _OccupiedBy, _AnimationState) {
+
+    var _BoardLocation = {};
+
+    if(_OccupiedBy !== -1 && _OccupiedBy !== 1) {
+        _OccupiedBy = 0;
+    }
+
+    _BoardLocation.X = _X;
+    _BoardLocation.Y = _Y;
+    _BoardLocation.OccupiedBy = _OccupiedBy;
+    _BoardLocation.AnimationState = _AnimationState;
+    _BoardLocation.IsValidForDark = true;
+    _BoardLocation.IsValidForLight = true;
+
+    return _BoardLocation;
 }
 
 //////////////////////////////// WEB SOCKET SETUP ////////////////////////////////
@@ -306,12 +408,19 @@ _mIO.sockets.on('connection', function (_Socket) {
 
         //Look for an existing Player record...
         var _ExistingPlayer = GetPlayerBySocketID(_Socket.id);
+        var _PrevRoomName = '';
 
         if(_ExistingPlayer) {
             //If we have an existing Player not in the newly requested RoomName, then leave their old room and update their CurrRoomName value...
             if(_ExistingPlayer.CurrRoomName !== _RoomName) {
                 //_Socket.leave(_ExistingPlayer.CurrRoomName);  //ToDo: Disabling this LEAVE since it seems to disconnect the Socket.
-                _ExistingPlayer.CurrRoomName = _RoomName;
+                _PrevRoomName = _ExistingPlayer.CurrRoomName;   //Save the Prev Room since BOTH need to be updated.
+                _ExistingPlayer.CurrRoomName = _RoomName;       //Switch the user to their new room.
+
+                if(_ExistingPlayer.CurrRoomName === LOBBYROOMNAME) {
+                    //Player moving from Game to Lobby, so remove from any Games...
+                    RemovePlayerFromGame(_ExistingPlayer.SocketID);
+                }
             }
 
             //Always clear any NextRoomName value when joining a room...
@@ -323,28 +432,30 @@ _mIO.sockets.on('connection', function (_Socket) {
             AddPlayer(_Socket.id, _Username, _RoomName);
         }
 
-        if(_RoomName === LOBBYROOMNAME) _Message = _RoomName + ' joined by ' + _Username + '.';
+        if(_RoomName === LOBBYROOMNAME && _PrevRoomName === '') _Message = _RoomName + ' joined by ' + _Username + '.';
+        else if(_RoomName === LOBBYROOMNAME && _PrevRoomName !== '') _Message = _Username + ' left game and returned to ' + LOBBYROOMNAME + '.';
         else                            _Message = 'Game joined by ' + _Username + '.';
 
-        //Always update the Lobby!...
+        //Always update the room being moved to!...
         var _SuccessData = {
             IsOpSuccess: true,
             Message: _Message,
-            PlayerData: GetPlayersByRoomName(LOBBYROOMNAME)
+            PlayerData: GetPlayersByRoomName(_RoomName),
+            GameData: GetGameByRoomName(_RoomName)
         }
         log('update_broadcast: ' + JSON.stringify(_SuccessData));
-        _mIO.sockets.in(LOBBYROOMNAME).emit('update_broadcast', _SuccessData);
+        _mIO.sockets.in(_RoomName).emit('update_broadcast', _SuccessData);
 
-        //If the RoomName is NOT the Lobby, update that room also...
-        if(_RoomName !== LOBBYROOMNAME) {
+        //If there was a room change, update the old room too...
+        if(_PrevRoomName !== '') {
             _SuccessData = {
                 IsOpSuccess: true,
                 Message: _Message,
-                PlayerData: GetPlayersByRoomName(_RoomName),
-                GameData: GetGameByRoomName(_RoomName)
+                PlayerData: GetPlayersByRoomName(_PrevRoomName),
+                GameData: GetGameByRoomName(_PrevRoomName)
             }
             log('update_broadcast: ' + JSON.stringify(_SuccessData));
-            _mIO.sockets.in(_RoomName).emit('update_broadcast', _SuccessData);
+            _mIO.sockets.in(_PrevRoomName).emit('update_broadcast', _SuccessData);
         }
     });
 
@@ -395,12 +506,16 @@ _mIO.sockets.on('connection', function (_Socket) {
                 _TargetPlayer.NextRoomName = _NewRoomForGame;
                 _Message = _SourcePlayer.Username + ' is playing ' + _TargetPlayer.Username + '.';
                 
-                //Also remove any relevant 'invite' data by essentially running the 'uninvite' filters above...
-                _SourcePlayer.InvitesTo = _SourcePlayer.InvitesTo.filter(function(_SocketID) { return _SocketID !== _TargetPlayer.SocketID; });
-                _TargetPlayer.InvitedBy = _TargetPlayer.InvitedBy.filter(function(_SocketID) { return _SocketID !== _SourcePlayer.SocketID; });
+                //Also remove any relevant 'invite' data by essentially running the 'uninvite' filters above, but in REVERSE (ie: Source was the player InvitedBy Target)...
+                _SourcePlayer.InvitedBy = _SourcePlayer.InvitedBy.filter(function(_SocketID) { return _SocketID !== _TargetPlayer.SocketID; });
+                _TargetPlayer.InvitesTo = _TargetPlayer.InvitesTo.filter(function(_SocketID) { return _SocketID !== _SourcePlayer.SocketID; });
+
+                //Remove the players from any previous games...
+                RemovePlayerFromGame(_SourcePlayer.SocketID);
+                RemovePlayerFromGame(_TargetPlayer.SocketID);
 
                 //Add a newly initialized Game to our server data...
-                _mData.Games.push(GetNewGame(_NewRoomForGame, _SourcePlayer.SocketID, _TargetPlayer.SocketID));
+                _mData.Games.push(GetNewGame(_NewRoomForGame, _SourcePlayer, _TargetPlayer, 8));
 
                 //Mark the data as dirty...
                 _mIsDataDirty = true;
@@ -462,5 +577,65 @@ _mIO.sockets.on('connection', function (_Socket) {
         };
         _mIO.sockets.in(_RoomName).emit('send_message_broadcast', _SuccessData);
         log(_Username + ' chatted in ' + _RoomName + '.');
+    });
+
+    //_Payload: X, Y, CurrTurn
+    _Socket.on('try_move', function (_Payload) {
+        log('Server Received Command', 'try_move', _Payload);
+
+        var _Message = '';
+
+        if (typeof _Payload === 'undefined' || !_Payload) {
+            _Message = 'No Payload Received - Command Aborted';
+            log(_Message);
+            _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+            return;
+        }
+
+        var _Player = GetPlayerBySocketID(_Socket.id);
+        if (typeof _Player === 'undefined' || !_Player) {
+            _Message = 'Player Could NOT Be Found - Command Aborted';
+            log(_Message);
+            _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+            return;
+        }
+
+        var _Game = GetGameByRoomName(_Player.CurrRoomName);
+        if (typeof _Game === 'undefined' || !_Game) {
+            _Message = 'Game Could NOT Be Found - Command Aborted';
+            log(_Message);
+            _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+            return;
+        }
+
+        if (typeof _Payload.X === 'undefined' || _Payload.X < 0 || _Payload.X >= _Game.BoardArray.length || 
+            typeof _Payload.Y === 'undefined' || _Payload.Y < 0 || _Payload.Y >= _Game.BoardArray.length) {
+            _Message = 'Invalid X/Y Position Received - Command Aborted';
+            log(_Message);
+            _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+            return;
+        }
+
+        // if (_Game.CurrTurn !== _Payload.CurrTurn || 
+        //     (_Game.CurrTurn === -1 && _Player.Username !== _Game.PlayerDark.Username) ||
+        //     (_Game.CurrTurn === 1 && _Player.Username !== _Game.PlayerLight.Username)) {
+        //     _Message = 'Invalid Player/Turn for Move - Command Aborted';
+        //     log(_Message);
+        //     _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+        //     return;
+        // }
+
+        //All seems good, execute the move by placing the CurrTurn value into the desired X/Y location...
+        _Game.ExecuteMove(_Payload.X, _Payload.Y);
+
+        //Respond...
+        var _SuccessData = {
+            IsOpSuccess: true,
+            Message: _Message,
+            PlayerData: GetPlayersByRoomName(_Player.CurrRoomName),
+            GameData: GetGameByRoomName(_Player.CurrRoomName)
+        }
+        log('update_broadcast: ' + JSON.stringify(_SuccessData));
+        _mIO.sockets.in(_Player.CurrRoomName).emit('update_broadcast', _SuccessData);
     });
 });

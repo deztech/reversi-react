@@ -26,6 +26,12 @@ export enum PageKey {
     Game
 }
 
+//Enum of "color" within the game (dark & light, ie: black & white)...
+// export enum GameColor {
+// 	Dark,
+// 	Light
+// }
+
 //Defines the Player data structure...
 export interface IPlayer {
     SocketID: string;
@@ -40,12 +46,16 @@ export interface IPlayer {
 //Defines the Game data structure...
 export interface IGame {
     RoomName: string;
-    PlayerDarkSocketID: string;
-    PlayerLightSocketID: string;
+    PlayerDark: IPlayer;
+    PlayerLight: IPlayer;
     CurrScoreDark: number;
     CurrScoreLight: number;
-    CurrMoveNum: number;
-    BoardArray: any[][];    //ToDo: This should probably be of type IBoardLocation once things are more defined.
+    CurrTurn: number;
+    NumOptionsDark: number;
+    NumOptionsLight: number;
+    BoardArray: IBoardLocation[][];
+    MovesArray: IMove[];
+    PlayerExitedUsername: string,
     AddedOn: Date;
 }
 
@@ -53,7 +63,16 @@ export interface IGame {
 export interface IBoardLocation {
     X: number;
     Y: number;
-    ToDoSomeStateValuesGoHere: any;
+    OccupiedBy: number;
+    AnimationState: number;
+    IsValidForDark: Boolean;
+    IsValidForLight: Boolean;
+}
+
+export interface IMove {
+    X: number;
+    Y: number;
+    CurrTurn: number;
 }
 
 //Interface of what a chat message is...
@@ -69,7 +88,7 @@ interface IServerDataResponse {
     ActionName: string;
     Message: string;
     PlayerData: IPlayer[];
-    GameData: IGame[];
+    GameData: IGame;
 }
 
 //Sent to Server when the user takes a Lobby Action...
@@ -83,6 +102,13 @@ interface ILobbyAction {
 interface IJoinRoom {
     RoomName: string;
     Username: string;
+}
+
+//Sent to Server when the user trys to make a move...
+interface ITryMove {
+    X: number;
+    Y: number;
+    CurrTurn: number;
 }
 
 //Sent to Server when the user chats out a new message...
@@ -107,9 +133,12 @@ interface AppState {
     NewChatMsgVal: string;
     ChatMsgs: IChatMsg[];
     PlayerData: IPlayer[];
+    GameData: IGame;
 }
 
 const LOBBYROOMNAME: string = 'Lobby';
+const NAMEDARKCOLOR: string = 'Blue';
+const NAMELIGHTCOLOR: string = 'Gold';
 
 export class App extends React.Component<{}, AppState> {
 
@@ -150,8 +179,10 @@ export class App extends React.Component<{}, AppState> {
             if (e.IsOpSuccess) {
                 //Update ChatMsgs...
                 let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
-                _NewChatMsgs.push({ Username:e.Username, Message:e.Message, AddedOn:new Date() });
-                
+                if(e.Message && e.Message !== '') {
+                    _NewChatMsgs.push({ Username:e.Username, Message:e.Message, AddedOn:new Date() });
+                }
+
                 //Update State...
                 if(e.Username === this.state.PlayerName) {
                     //Update NewChatMsgVal to '' if the message received is from the current/active player...
@@ -188,6 +219,11 @@ export class App extends React.Component<{}, AppState> {
         return _PlayerData.find(_Player => _Player.Username === this.state.PlayerName);
     }
 
+    //Get Player by SocketID...
+    public GetPlayerBySocketID = (_SocketID:string) => {
+        return this.state.PlayerData.find(_Player => _Player.SocketID === _SocketID);
+    }
+
     private EmitLobbyAction = (_LobbyAction:ILobbyAction) => {
         console.log(_LobbyAction.ActionName + ' ' + _LobbyAction.SourceSocketID + '->' + _LobbyAction.TargetSocketID);
         this.mSocket.emit('lobby_action', _LobbyAction);
@@ -202,7 +238,9 @@ export class App extends React.Component<{}, AppState> {
 
         //Update ChatMsgs...
         let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
-        _NewChatMsgs.push({ Username:'SYSTEM', Message:e.Message, AddedOn:new Date() });
+        if(e.Message && e.Message !== '') {
+            _NewChatMsgs.push({ Username:'SYSTEM', Message:e.Message, AddedOn:new Date() });
+        }
 
         //Get the Active Player and Current Active PageKey...
         let _ActivePlayer = this.GetActivePlayerFromPlayerArray(e.PlayerData);
@@ -216,8 +254,9 @@ export class App extends React.Component<{}, AppState> {
         //Update State...
         this.setState({
             ActivePage: _CurrPageKey,
+            ChatMsgs: _NewChatMsgs,
             PlayerData: e.PlayerData,
-            ChatMsgs: _NewChatMsgs
+            GameData: e.GameData
         });
 
         if(_ActivePlayer.NextRoomName !== '') {
@@ -275,6 +314,28 @@ export class App extends React.Component<{}, AppState> {
         this.EmitLobbyAction(_Payload);
     }
 
+    //Game Component Handler(s)...
+    private handleGameQuit = (e: React.FormEvent<HTMLButtonElement>) => {
+
+        var _GameData = this.state.GameData;
+
+        let _Payload: IJoinRoom = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName };
+        console.log('JoinRoom: ' + JSON.stringify(_Payload));
+        this.mSocket.emit('join_room', _Payload);
+
+        this.setState({
+            ActivePage: PageKey.Lobby,
+            GameData: _GameData
+        });
+    }
+
+    //GameSquare Component Handler(s)...
+    private handleGameSquareClick = (BoardLocation: IBoardLocation, CurrTurn: number) => {
+        let _Payload: ITryMove = { X: BoardLocation.X, Y: BoardLocation.Y, CurrTurn: CurrTurn };
+        console.log('TryMove: ' + JSON.stringify(_Payload));
+        this.mSocket.emit('try_move', _Payload);
+    }
+
     private handleChatMsgSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
         let _ChatPayload: ISendMessage = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName, Message: e.currentTarget.value };
         console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
@@ -320,7 +381,12 @@ export class App extends React.Component<{}, AppState> {
                 case PageKey.Game:
                     return <div id="GameChat">
                             <Game  onNavigate={this.handleNavAction} 
-                                   PlayerName={this.state.PlayerName} />
+                                   onQuit={this.handleGameQuit}
+                                   onGameSquareClick={this.handleGameSquareClick}
+                                   ActivePlayer={this.GetActivePlayer()} 
+                                   GameData={this.state.GameData}
+                                   NameDarkColor={NAMEDARKCOLOR}
+                                   NameLightColor={NAMELIGHTCOLOR} />
                             <Chat  onNavigate={this.handleNavAction} 
                                    onMsgSubmit={this.handleChatMsgSubmitEvent} 
                                    PlayerName={this.state.PlayerName} 

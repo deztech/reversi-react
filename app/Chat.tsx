@@ -38,8 +38,10 @@ export class Chat extends React.Component<ChatProps, ChatState> {
 
     render() {
         //Use slice() to copy the array and THEN reverse() to reverse the copy (otherwise it reverses back and forth on every key stroke)...
-        const ChatMsgs = this.props.ChatMsgs.slice().reverse().map((_ChatMsg:IChatMsg) => {
-            return <div key={_ChatMsg.AddedOn.getMilliseconds()} className="ChatMsg"><strong>{_ChatMsg.Username}:</strong> <span>{_ChatMsg.Message}</span></div>;
+        const ChatMsgs = this.props.ChatMsgs.slice().reverse().map((_ChatMsg:IChatMsg, _Index:number) => {
+            if(_ChatMsg.Message !== '') {
+                return <div key={_Index} className="ChatMsg"><strong>{_ChatMsg.Username}:</strong> <span>{_ChatMsg.Message}</span></div>;
+            }
         });
 
         return (
