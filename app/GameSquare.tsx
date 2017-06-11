@@ -22,6 +22,10 @@ export class GameSquare extends React.Component<GameSquareProps, GameSquareState
 
     render() {
 
+        var TurnColor = "dark";
+        if(this.props.CurrTurn === 1)
+            TurnColor = "light";
+
         var SquareImg = "token";
 
         if(this.props.BoardLocation.OccupiedBy === -1)
@@ -33,14 +37,24 @@ export class GameSquare extends React.Component<GameSquareProps, GameSquareState
 
         if(this.props.BoardLocation.AnimationState === 0)
             SquareImg = SquareImg + "-fadingin";
+        else if(this.props.BoardLocation.AnimationState > 0)
+            SquareImg = SquareImg + "-flipping";
 
         const IsValidSquare = this.props.IsMyTurn &&
                               ((this.props.CurrTurn === -1 && this.props.BoardLocation.IsValidForDark) || 
                                (this.props.CurrTurn === 1 && this.props.BoardLocation.IsValidForLight));
+        
+        // const Output = IsValidSquare ?
+        //                 <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img className="img-fluid" src={"/img/" + SquareImg + ".gif"} /><img className="img-fluid token-hover" src="/img/token-hover.gif" /></a> :
+        //                 <img className="img-fluid" src={"/img/" + SquareImg + ".gif"} />
+
+        const Output = IsValidSquare ?
+                        <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img className="img-fluid" src={"/img/" + SquareImg + ".gif"} /></a> :
+                        <img className="img-fluid" src={"/img/" + SquareImg + ".gif"} />
 
         return (
-            <div className={"GameSquareComponent valid-" + IsValidSquare}>
-                <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img className="img-fluid" src={"/img/" + SquareImg + ".gif"} /></a>
+            <div className={"GameSquareComponent valid-" + IsValidSquare + " valid-" + TurnColor}>
+                {Output}
             </div>
         );
     }

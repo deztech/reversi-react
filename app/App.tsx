@@ -26,12 +26,6 @@ export enum PageKey {
     Game
 }
 
-//Enum of "color" within the game (dark & light, ie: black & white)...
-// export enum GameColor {
-// 	Dark,
-// 	Light
-// }
-
 //Defines the Player data structure...
 export interface IPlayer {
     SocketID: string;
@@ -51,12 +45,16 @@ export interface IGame {
     CurrScoreDark: number;
     CurrScoreLight: number;
     CurrTurn: number;
+    IsCurrTurnMustPass: boolean;
+    IsGameOver: boolean;
+    GameOverMessage: string;
     NumOptionsDark: number;
     NumOptionsLight: number;
     BoardArray: IBoardLocation[][];
     MovesArray: IMove[];
-    PlayerExitedUsername: string,
+    PlayerExitedUsername: string;
     AddedOn: Date;
+    ModifiedOn: Date;
 }
 
 //Defines a single Location (square) on the Game's BoardArray...
@@ -315,6 +313,10 @@ export class App extends React.Component<{}, AppState> {
     }
 
     //Game Component Handler(s)...
+    private handleGamePlay = (BoardSize: number) => {
+        this.mSocket.emit('replay', { BoardSize: BoardSize });
+    }
+
     private handleGameQuit = (e: React.FormEvent<HTMLButtonElement>) => {
 
         var _GameData = this.state.GameData;
@@ -381,6 +383,7 @@ export class App extends React.Component<{}, AppState> {
                 case PageKey.Game:
                     return <div id="GameChat">
                             <Game  onNavigate={this.handleNavAction} 
+                                   onReplay={this.handleGamePlay}
                                    onQuit={this.handleGameQuit}
                                    onGameSquareClick={this.handleGameSquareClick}
                                    ActivePlayer={this.GetActivePlayer()} 
@@ -413,7 +416,8 @@ export class App extends React.Component<{}, AppState> {
                             <span>
                                 By <a href="http://aaronsoto.com" target="_blank">Aaron Soto <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
                                 For <a href="http://mhcid.ics.uci.edu/" target="_blank">UC Irvine's MHCID Program <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
-                                <a href="https://github.com/deztech/reversi-react" target="_blank">GitHub.com/deztech/reversi-react <i className="fa fa-external-link" aria-hidden="true"></i></a>
+                                <a href="https://github.com/deztech/reversi-react" target="_blank">GitHub.com/deztech/reversi-react <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
+                                <a href="/serverdata.json" target="_blank">View Server Data (JSON) <i className="fa fa-external-link" aria-hidden="true"></i></a>
                             </span>
                         </div>
                     </div>

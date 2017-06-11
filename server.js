@@ -38,6 +38,7 @@ console.log('SERVER IS RUNNING...');
 //////////////////////////////// DATA SETUP ////////////////////////////////
 var _mJsonFile = require('jsonfile');
 
+const BOARDSIZE = 8;
 const LOBBYROOMNAME = 'Lobby';
 // const PLAYERDATA = 'PLAYERDATA';
 // const ROOMDATA = 'ROOMDATA';
@@ -70,6 +71,9 @@ _mData.Games => Game[]
             CurrScoreDark (number),
             CurrScoreLight (number),
             CurrTurn (number; -1=Dark & 1=Light)
+            IsCurrTurnMustPass (boolean)
+            IsGameOver (boolean)
+            GameOverMessage (string)
             NumOptionsDark (number; the number of valid move options for Dark)
             NumOptionsLight (number; the number of valid move options for Light)
             BoardArray (object[][]; object is of 'type' BoardLocation), 
@@ -211,6 +215,14 @@ function RemovePlayerFromGame(_SocketID) {
     }
 }
 
+//Removes a Game from the Server Data...
+function RemoveGame(_RoomName) {
+    //Update the Games array by filtering out the unwanted Game...
+    _mData.Games = _mData.Games.filter(function(_Game){
+        return _Game.RoomName !== _RoomName;
+    });
+}
+
 //Gets a Game by RoomName...
 function GetGameByRoomName(_RoomName) {
     if(_RoomName === LOBBYROOMNAME) return;
@@ -226,11 +238,9 @@ function GetGameByRoomName(_RoomName) {
 function GetNewGame(_NewRoomForGame, _PlayerA, _PlayerB, _BoardSize) {
 
     //Make sure we have a valid _BoardSize value...
-    if(typeof(_BoardSize) !== 'number' || _BoardSize < 8 || _BoardSize % 2 !== 0) {
+    if(typeof(_BoardSize) !== 'number' || _BoardSize < 6 || _BoardSize % 2 !== 0) {
         _BoardSize = 8; //Default to 8!
     }
-
-    var _StartingPoint = (_BoardSize / 2) - 1;  //ie: 8 => (8/2)-1 = 3 OR (10/2)-1 = 4
 
     //Init and set the basics...
     var _Game = {};
@@ -240,23 +250,12 @@ function GetNewGame(_NewRoomForGame, _PlayerA, _PlayerB, _BoardSize) {
     _Game.CurrTurn = -1;
     _Game.NumOptionsDark = -1;
     _Game.NumOptionsLight = -1;
-
-    //Set up the BoardArray...
-    _Game.BoardArray = CreateArray(_BoardSize, _BoardSize);
-    for(var x = 0; x < _BoardSize; x++) {
-        for(var y = 0; y < _BoardSize; y++) {
-            _Game.BoardArray[x][y] = GetBoardLocation(x, y, 0, -1);
-        }
-    }
-    _Game.BoardArray[_StartingPoint][_StartingPoint] = GetBoardLocation(_StartingPoint, _StartingPoint, 1, 0);
-    _Game.BoardArray[_StartingPoint+1][_StartingPoint+1] = GetBoardLocation(_StartingPoint+1, _StartingPoint+1, 1, 0);
-    _Game.BoardArray[_StartingPoint][_StartingPoint+1] = GetBoardLocation(_StartingPoint, _StartingPoint+1, -1, 0);
-    _Game.BoardArray[_StartingPoint+1][_StartingPoint] = GetBoardLocation(_StartingPoint+1, _StartingPoint, -1, 0);
+    _Game.IsCurrTurnMustPass = false;
+    _Game.IsGameOver = false;
+    _Game.GameOverMessage = ''
 
     //Init the MovesArray...
     _Game.MovesArray = [];
-
-    _Game.AddedOn = Date.now();
 
     //Randomly choose who is Dark and goes first...
     if(Math.random() < 0.5) {
@@ -268,42 +267,244 @@ function GetNewGame(_NewRoomForGame, _PlayerA, _PlayerB, _BoardSize) {
         _Game.PlayerLight = _PlayerA;
     }
 
-    //Store a value for when a play exits...
+    //Init an empty BoardArray...
+    _Game.BoardArray = CreateArray(_BoardSize, _BoardSize);
+    for(var x = 0; x < _BoardSize; x++) {
+        for(var y = 0; y < _BoardSize; y++) {
+            _Game.BoardArray[x][y] = GetBoardLocation(x, y, 0, -1);
+        }
+    }
+    
+    //Define a value for when a player exits...
     _Game.PlayerExitedUsername = '';
 
-    _Game.ExecuteMove = function(_X, _Y) {
-        //Reset Animation Values...
-        this.BoardArray.forEach(function(_BoardArrayInner) {
-            _BoardArrayInner.forEach(function(_BoardLocation) {
-                if(_BoardLocation.X !== _X || _BoardLocation.Y !== _Y) {
-                    _BoardLocation.AnimationState = -1;
-                }
-            });
-        });
-                
-        //Perform BoardLocation Update...
-        this.BoardArray[_X][_Y] = GetBoardLocation(_X, _Y, this.CurrTurn, 0);
-        this.MovesArray.push({ X:_X, Y:_Y, CurrTurn:this.CurrTurn})
-        this.CurrTurn = _Game.CurrTurn * -1;
+    //Define Date/Time values...
+    _Game.AddedOn = Date.now();
+    _Game.ModifiedOn = Date.now();
 
-        //Update Score Values...
-        this.CurrScoreDark = 0;
-        this.CurrScoreLight = 0;
-        for(var x = 0; x < this.BoardArray.length; x++) {
-            for(var y = 0; y < this.BoardArray.length; y++) {
-                //Sum the Scores...
-                if(_Game.BoardArray[x][y].OccupiedBy === -1) {
-                    this.CurrScoreDark++;
-                }
-                else if(_Game.BoardArray[x][y].OccupiedBy === 1) {
-                    this.CurrScoreLight++;
-                }
+    //Make the first four moves...
+    var _StartingPoint = (_BoardSize / 2) - 1;  //ie: 8 => (8/2)-1 = 3 OR (10/2)-1 = 4
+    ExecuteGameMove(_Game, _StartingPoint+1, _StartingPoint, true);    //Dark  (4,3)
+    ExecuteGameMove(_Game, _StartingPoint, _StartingPoint, true);      //Light (3,3)
+    ExecuteGameMove(_Game, _StartingPoint, _StartingPoint+1, true);    //Dark  (3,4)
+    ExecuteGameMove(_Game, _StartingPoint+1, _StartingPoint+1, false); //Light (4,4)
+
+    //Return the new game object...
+    return _Game;
+}
+
+function ExecuteGameMove(_Game, _X, _Y, _IsInitMove) {
+    _IsInitMove = _IsInitMove || false;
+
+    //Reset Animation and Validity Values...
+    _Game.BoardArray.forEach(function(_BoardArrayInner) {
+        _BoardArrayInner.forEach(function(_BoardLocation) {
+            if(_BoardLocation.X !== _X || _BoardLocation.Y !== _Y) {
+                _BoardLocation.AnimationState = -1;
+                _BoardLocation.IsValidForDark = false;
+                _BoardLocation.IsValidForLight = false;
+            }
+        });
+    });
+            
+    //Perform BoardLocation Update...
+    if(_Game.IsCurrTurnMustPass === false) {
+        _Game.BoardArray[_X][_Y] = GetBoardLocation(_X, _Y, _Game.CurrTurn, 0);
+        ExecuteTokenFlips(_Game, _X, _Y, _Game.CurrTurn);
+    }
+
+    _Game.MovesArray.push({ X:_X, Y:_Y, CurrTurn:_Game.CurrTurn})
+    _Game.CurrTurn = _Game.CurrTurn * -1;
+    _Game.ModifiedOn = Date.now();
+
+    //Update NumOptions and Score Values...
+    _Game.NumOptionsDark = 0;
+    _Game.NumOptionsLight = 0;
+    _Game.CurrScoreDark = 0;
+    _Game.CurrScoreLight = 0;
+    for(var x = 0; x < _Game.BoardArray.length; x++) {
+        for(var y = 0; y < _Game.BoardArray.length; y++) {
+            if(!_IsInitMove) {
+                //Find/Calc Options...
+                _Game.BoardArray[x][y].IsValidForDark = IsLegalMoveAvailable(_Game, x, y, -1);
+                _Game.BoardArray[x][y].IsValidForLight = IsLegalMoveAvailable(_Game, x, y, 1);
+
+                if(_Game.BoardArray[x][y].IsValidForDark)
+                    _Game.NumOptionsDark++;
+
+                if(_Game.BoardArray[x][y].IsValidForLight)
+                    _Game.NumOptionsLight++;
+            }
+
+            //Sum the Scores...
+            if(_Game.BoardArray[x][y].OccupiedBy === -1) {
+                _Game.CurrScoreDark++;
+            }
+            else if(_Game.BoardArray[x][y].OccupiedBy === 1) {
+                _Game.CurrScoreLight++;
             }
         }
     }
 
-    //Return the new game object...
-    return _Game;
+    //Set IsCurrTurnMustPass & IsGameOver...
+    if(_IsInitMove) {
+        _Game.NumOptionsDark = 4;
+        _Game.NumOptionsLight = 4;
+    }
+    _Game.IsCurrTurnMustPass = (_Game.CurrTurn === -1 && _Game.NumOptionsDark === 0) || (_Game.CurrTurn === 1 && _Game.NumOptionsLight === 0);
+    _Game.IsGameOver = _Game.NumOptionsDark === 0 && _Game.NumOptionsLight === 0;
+
+    if(_Game.IsGameOver) {
+        if(_Game.CurrScoreDark > _Game.CurrScoreLight)
+            _Game.GameOverMessage = _Game.PlayerDark.Username + ' Wins ' + _Game.CurrScoreDark + ' - ' + _Game.CurrScoreLight + '!';
+        else if(_Game.CurrScoreLight > _Game.CurrScoreDark)
+            _Game.GameOverMessage = _Game.PlayerLight.Username + ' Wins ' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + '!';
+        else
+            _Game.GameOverMessage = 'Game Tied! (' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + ')';
+    }
+}
+
+//Performs the token flips according to the move just made at position X,Y...
+function ExecuteTokenFlips(_Game, _X, _Y, _CurrColor) {
+    //Call FlipTokensDownTheLine for each of the 8 possible directions...
+    FlipTokensDownTheLine(_Game, _X, _Y, -1, -1, _CurrColor, 1);    //NW
+    FlipTokensDownTheLine(_Game, _X, _Y, -1,  0, _CurrColor, 1);    //NN
+    FlipTokensDownTheLine(_Game, _X, _Y, -1,  1, _CurrColor, 1);    //NE
+    FlipTokensDownTheLine(_Game, _X, _Y,  0,  1, _CurrColor, 1);    //EE
+    FlipTokensDownTheLine(_Game, _X, _Y,  1,  1, _CurrColor, 1);    //SE
+    FlipTokensDownTheLine(_Game, _X, _Y,  1,  0, _CurrColor, 1);    //SS
+    FlipTokensDownTheLine(_Game, _X, _Y,  1, -1, _CurrColor, 1);    //SW
+    FlipTokensDownTheLine(_Game, _X, _Y,  0, -1, _CurrColor, 1);    //WW
+}
+
+//Flips any relevant OTHER tokens down a line until it reaches the CURRENT color token...
+function FlipTokensDownTheLine(_Game, _X, _Y, _RowDelta, _ColDelta, _CurrColor, _CurrDepth) {
+    //Init Vars...
+    var _NextX = _X + _RowDelta;
+    var _NextY = _Y + _ColDelta;
+
+    //Check non-existent/invalid board position...
+    if(IsSpaceExistingOnBoard(_Game, _NextX, _NextY) === false)
+        return false;
+
+    //Check for space (ie: 0)...
+    if(IsSpaceTheGivenColor(_Game, _NextX, _NextY, 0))
+        return false;
+
+    //Check for desired color...
+    if(IsSpaceTheGivenColor(_Game, _NextX, _NextY, _CurrColor)) {
+        return true;
+    }
+    else {
+        if(FlipTokensDownTheLine(_Game, _NextX, _NextY, _RowDelta, _ColDelta, _CurrColor, _CurrDepth + 1)) {
+            _Game.BoardArray[_NextX][_NextY] = GetBoardLocation(_NextX, _NextY, _CurrColor, _CurrDepth);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+}
+
+//Looks to see if at least one legal move is available for the given X,Y board position...
+function IsLegalMoveAvailable(_Game, _X, _Y, _CurrColor) {
+    //Step 1: Check if the space is empty...
+    if(_Game.BoardArray[_X][_Y].OccupiedBy !== 0)
+        return false;
+
+    //Step 2: Check if the empty space has an adjoining space of the OTHER color and then eventually also the CURR color...
+    var _RowDelta, _ColDelta;
+    var _OthrColor = _CurrColor * -1;
+
+    //Check NW...
+    _RowDelta = -1;
+    _ColDelta = -1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check NN...
+    _RowDelta = -1;
+    _ColDelta = 0;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check NE...
+    _RowDelta = -1;
+    _ColDelta = 1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check WW...
+    _RowDelta = 0;
+    _ColDelta = 1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check SW...
+    _RowDelta = 1;
+    _ColDelta = 1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check SS...
+    _RowDelta = 1;
+    _ColDelta = 0;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check SE...
+    _RowDelta = 1;
+    _ColDelta = -1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    //Check EE...
+    _RowDelta = 0;
+    _ColDelta = -1;
+    if(IsSpaceTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _OthrColor) &&                                                          //Check for adjacent OTHER color!
+       IsLineEndingInTheGivenColor(_Game, _X + _RowDelta + _RowDelta, _Y + _ColDelta + _ColDelta, _RowDelta, _ColDelta, _CurrColor))            //Check for adjacent+1 CURR color!
+        return true;
+
+    return false;
+}
+
+//Checks if a given X,Y is a position that exists on our BoardArray...
+function IsSpaceExistingOnBoard(_Game, _X, _Y) {
+    return _X >= 0 && _X < _Game.BoardArray.length &&
+           _Y >= 0 && _Y < _Game.BoardArray.length;
+}
+
+//Check if we have a valid board position AND that it contains the given color...
+function IsSpaceTheGivenColor(_Game, _X, _Y, _ColorToCheck) {
+    return IsSpaceExistingOnBoard(_Game, _X, _Y) && 
+           _Game.BoardArray[_X][_Y].OccupiedBy === _ColorToCheck;
+}
+
+//Beginning at the X,Y position and moving according to the RowDelta and ColDelta values, try to find the given color...
+function IsLineEndingInTheGivenColor(_Game, _X, _Y, _RowDelta, _ColDelta, _ColorToFindAtEnd) {
+
+    //Check if we've moved off the board (ie: => FALSE)...
+    if(IsSpaceExistingOnBoard(_Game, _X, _Y) === false)
+        return false;
+
+    //Check if we've encountered a space (ie: => FALSE)...
+    else if(IsSpaceTheGivenColor(_Game, _X, _Y, 0))
+        return false;
+        
+    //Check if we've encountered the color we're searching for (ie: => TRUE)...
+    else if (IsSpaceTheGivenColor(_Game, _X, _Y, _ColorToFindAtEnd))
+        return true;
+
+    //Make a recursive call to check the next position in our given direction...
+    else
+        return IsLineEndingInTheGivenColor(_Game, _X + _RowDelta, _Y + _ColDelta, _RowDelta, _ColDelta, _ColorToFindAtEnd);
 }
 
 //Builds a BoardLocation object based on X (row), Y (column), OccupiedBy (-1=>Dark; 0=>Blank; 1=>Light), & AnimationState (-1=>None; 0=>New; 1+=>OrderOfAnimation)
@@ -319,8 +520,8 @@ function GetBoardLocation(_X, _Y, _OccupiedBy, _AnimationState) {
     _BoardLocation.Y = _Y;
     _BoardLocation.OccupiedBy = _OccupiedBy;
     _BoardLocation.AnimationState = _AnimationState;
-    _BoardLocation.IsValidForDark = true;
-    _BoardLocation.IsValidForLight = true;
+    _BoardLocation.IsValidForDark = false;
+    _BoardLocation.IsValidForLight = false;
 
     return _BoardLocation;
 }
@@ -515,7 +716,7 @@ _mIO.sockets.on('connection', function (_Socket) {
                 RemovePlayerFromGame(_TargetPlayer.SocketID);
 
                 //Add a newly initialized Game to our server data...
-                _mData.Games.push(GetNewGame(_NewRoomForGame, _SourcePlayer, _TargetPlayer, 8));
+                _mData.Games.push(GetNewGame(_NewRoomForGame, _SourcePlayer, _TargetPlayer, BOARDSIZE));
 
                 //Mark the data as dirty...
                 _mIsDataDirty = true;
@@ -608,25 +809,26 @@ _mIO.sockets.on('connection', function (_Socket) {
             return;
         }
 
-        if (typeof _Payload.X === 'undefined' || _Payload.X < 0 || _Payload.X >= _Game.BoardArray.length || 
-            typeof _Payload.Y === 'undefined' || _Payload.Y < 0 || _Payload.Y >= _Game.BoardArray.length) {
+        //NOTE: We allow X=Y = -1 for the PASS move...
+        if (typeof _Payload.X === 'undefined' || _Payload.X < -1 || _Payload.X >= _Game.BoardArray.length || 
+            typeof _Payload.Y === 'undefined' || _Payload.Y < -1 || _Payload.Y >= _Game.BoardArray.length) {
             _Message = 'Invalid X/Y Position Received - Command Aborted';
             log(_Message);
             _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
             return;
         }
 
-        // if (_Game.CurrTurn !== _Payload.CurrTurn || 
-        //     (_Game.CurrTurn === -1 && _Player.Username !== _Game.PlayerDark.Username) ||
-        //     (_Game.CurrTurn === 1 && _Player.Username !== _Game.PlayerLight.Username)) {
-        //     _Message = 'Invalid Player/Turn for Move - Command Aborted';
-        //     log(_Message);
-        //     _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
-        //     return;
-        // }
+        if (_Game.CurrTurn !== _Payload.CurrTurn || 
+            (_Game.CurrTurn === -1 && _Player.Username !== _Game.PlayerDark.Username) ||
+            (_Game.CurrTurn === 1 && _Player.Username !== _Game.PlayerLight.Username)) {
+            _Message = 'Invalid Player/Turn for Move - Command Aborted';
+            log(_Message);
+            _Socket.emit('error_response', { IsOpSuccess: false, ActionName:'try_move', Message: _Message });
+            return;
+        }
 
         //All seems good, execute the move by placing the CurrTurn value into the desired X/Y location...
-        _Game.ExecuteMove(_Payload.X, _Payload.Y);
+        ExecuteGameMove(_Game, _Payload.X, _Payload.Y);
 
         //Respond...
         var _SuccessData = {
@@ -637,5 +839,48 @@ _mIO.sockets.on('connection', function (_Socket) {
         }
         log('update_broadcast: ' + JSON.stringify(_SuccessData));
         _mIO.sockets.in(_Player.CurrRoomName).emit('update_broadcast', _SuccessData);
+    });
+
+    //_Payload: NONE! (no payload passed as we just need to regenerate a fresh Game object)
+    _Socket.on('replay', function (_Payload) {
+        log('Server Received Command', 'replay');
+
+        var _BoardSize = BOARDSIZE;
+
+        if(_Payload && _Payload.BoardSize)
+            _BoardSize = _Payload.BoardSize;
+
+        //Make sure we have a valid _BoardSize value...
+        if(typeof(_BoardSize) !== 'number' || _BoardSize < 6 || _BoardSize % 2 !== 0) {
+            _BoardSize = 8; //Default to 8!
+        }
+        
+        //Get the Player object...
+        var _Player = GetPlayerBySocketID(_Socket.id);
+
+        //Get the previous Game object...
+        var _OldGame = GetGameByRoomName(_Player.CurrRoomName);
+
+        //Use the previous Game object to pass inputs to get a NEW Game object...
+        var _NewGame = GetNewGame(_OldGame.RoomName, _OldGame.PlayerDark, _OldGame.PlayerLight, _BoardSize);
+
+        //Remove the Previous Game from the Server's Games array...
+        RemoveGame(_OldGame.RoomName);
+
+        //Add the new Game to the Server's Games array...
+        _mData.Games.push(_NewGame);
+        
+        //Mark the data as dirty...
+        _mIsDataDirty = true;
+
+        //Respond...
+        var _SuccessData = {
+            IsOpSuccess: true,
+            Message: 'New Game Created!',
+            PlayerData: GetPlayersByRoomName(_NewGame.RoomName),
+            GameData: GetGameByRoomName(_NewGame.RoomName)
+        }
+        log('update_broadcast: ' + JSON.stringify(_SuccessData));
+        _mIO.sockets.in(_NewGame.RoomName).emit('update_broadcast', _SuccessData);
     });
 });
