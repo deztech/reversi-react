@@ -12,10 +12,6 @@
     border-bottom: 2px solid #006;
 }
 
-.score-row img {
-    max-width: 48px;
-    max-height: 48px;
-}
 
 .game-board {
     display: inline-block;
@@ -27,9 +23,25 @@
     clear: both;
 }
 
-.game-feedback {
+@media (min-width: 0) {
+  .score-row img {
+      max-width: 32px;
+      max-height: 32px;
+  }
+  .game-feedback {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+}
+@media (min-width: 768px) {
+  .score-row img {
+      max-width: 48px;
+      max-height: 48px;
+  }
+  .game-feedback {
     font-size: 1.5em;
     font-weight: bold;
+  }
 }
 
 .actions-row button {
