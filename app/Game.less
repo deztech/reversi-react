@@ -1,21 +1,10 @@
-.score-row span {
-    margin: auto;
-    padding: 2px 5px;
-    font-weight: bold;
-}
-
-.score-row .score-value {
-    font-size: 1.5em;
-}
-
 .score-row .player-curr {
     border-bottom: 2px solid #006;
 }
 
-
 .game-board {
     display: inline-block;
-    border: 5px solid #999;
+    border: 4px solid #999;
 }
 
 .board-row {
@@ -24,9 +13,17 @@
 }
 
 @media (min-width: 0) {
+  .score-row .score-value {
+    font-size: 1.2em;
+  }
+  .score-row span {
+    margin: auto;
+    padding: 2px 3px;
+    font-weight: bold;
+  }
   .score-row img {
-      max-width: 32px;
-      max-height: 32px;
+      max-width: 24px;
+      max-height: 24px;
   }
   .game-feedback {
     font-size: 1.1em;
@@ -34,6 +31,14 @@
   }
 }
 @media (min-width: 768px) {
+  .score-row .score-value {
+    font-size: 1.5em;
+  }
+  .score-row span {
+    margin: auto;
+    padding: 2px 5px;
+    font-weight: bold;
+  }
   .score-row img {
       max-width: 48px;
       max-height: 48px;
