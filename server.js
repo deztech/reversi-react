@@ -830,6 +830,10 @@ _mIO.sockets.on('connection', function (_Socket) {
             return;
         }
 
+        //Add a message when a "Pass Turn" is played to make that more obvious to the players...
+        if(_Payload.X === -1 && _Payload.Y === -1)
+            _Message = _Player.Username + ' had to pass their turn.';
+
         //All seems good, execute the move by placing the CurrTurn value into the desired X/Y location...
         ExecuteGameMove(_Game, _Payload.X, _Payload.Y);
 

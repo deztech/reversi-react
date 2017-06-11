@@ -70,7 +70,7 @@ export class Game extends React.Component<GameProps, GameState> {
 
         return (
             <div className="GameComponent">
-                <div className="row text-center">
+                <div className="row row-withoutmargin text-center">
                     <div className="col">
                         <h1>Game</h1>
                     </div>
