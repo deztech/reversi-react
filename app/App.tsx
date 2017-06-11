@@ -387,9 +387,7 @@ export class App extends React.Component<{}, AppState> {
                                    onQuit={this.handleGameQuit}
                                    onGameSquareClick={this.handleGameSquareClick}
                                    ActivePlayer={this.GetActivePlayer()} 
-                                   GameData={this.state.GameData}
-                                   NameDarkColor={NAMEDARKCOLOR}
-                                   NameLightColor={NAMELIGHTCOLOR} />
+                                   GameData={this.state.GameData} />
                             <Chat  onNavigate={this.handleNavAction} 
                                    onMsgSubmit={this.handleChatMsgSubmitEvent} 
                                    PlayerName={this.state.PlayerName} 

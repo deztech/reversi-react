@@ -362,6 +362,9 @@ function ExecuteGameMove(_Game, _X, _Y, _IsInitMove) {
         else
             _Game.GameOverMessage = 'Game Tied! (' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + ')';
     }
+
+    //Set the Server Data as dirty...
+    _mIsDataDirty = true;
 }
 
 //Performs the token flips according to the move just made at position X,Y...

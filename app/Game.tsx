@@ -17,29 +17,26 @@ interface GameProps {
     onGameSquareClick: (BoardLocation: IBoardLocation, CurrTurn: number) => void;
     ActivePlayer: IPlayer;
     GameData: IGame;
-    NameDarkColor: string;
-    NameLightColor: string;
 }
 
 interface GameState {
-    ActivePlayerColor: number;
-    OtherPlayer: IPlayer;
+    // ActivePlayerColor: number;
+    // OtherPlayer: IPlayer;
 }
 
 export class Game extends React.Component<GameProps, GameState> {
     
     state = {
-        ActivePlayerColor: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? -1 : 1,
-        OtherPlayer: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? this.props.GameData.PlayerLight : this.props.GameData.PlayerDark
+        // ActivePlayerColor: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? -1 : 1,
+        // OtherPlayer: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? this.props.GameData.PlayerLight : this.props.GameData.PlayerDark
     } as GameState;
 
     render() {
 
-        //const Timer = <div><Timer /></div>;
-
-        const IsMyTurn = this.state.ActivePlayerColor === this.props.GameData.CurrTurn;
-
-        const CurrTurnUsername = IsMyTurn ? this.props.ActivePlayer.Username : this.state.OtherPlayer.Username;
+        const ActivePlayerColor = this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? -1 : 1;
+        const OtherPlayer = this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? this.props.GameData.PlayerLight : this.props.GameData.PlayerDark
+        const IsMyTurn = ActivePlayerColor === this.props.GameData.CurrTurn;
+        const CurrTurnUsername = IsMyTurn ? this.props.ActivePlayer.Username : OtherPlayer.Username;
 
         const BoardOutput = this.props.GameData.BoardArray.map((_BoardLocation:IBoardLocation[], _X:number) => {
             const Inner = _BoardLocation.map((_BoardLocation:IBoardLocation, _Y:number) => {
@@ -52,7 +49,7 @@ export class Game extends React.Component<GameProps, GameState> {
                             <div>{this.props.GameData.GameOverMessage}</div> :
                             <div>{CurrTurnUsername}&#39;s Move (#{this.props.GameData.MovesArray.length - 4 + 1}): <Timer key={(Date.now())} /></div>
         
-        var SwitchBtn = <div></div>;
+        var SwitchBtn = <span></span>;
         if(this.props.GameData.MovesArray.length === 4 && this.props.GameData.BoardArray.length === 6)
             SwitchBtn = <button id="SwchButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(8); }}>Play 8x8</button>;
         else if(this.props.GameData.MovesArray.length === 4 && this.props.GameData.BoardArray.length === 8)
@@ -81,8 +78,8 @@ export class Game extends React.Component<GameProps, GameState> {
                         <span className={this.props.GameData.CurrTurn === -1 ? "player-name player-dark player-curr" : "player-name player-dark"}>{this.props.GameData.PlayerDark.Username}</span>
                         <span>:</span>
                         <span className="score-value score-dark">{this.props.GameData.CurrScoreDark}</span>
-                        <span className="token-img token-dark"><img src="../img/token-dark-fadingin.gif" alt={this.props.NameDarkColor + " Score"} /></span>
-                        <span className="token-img token-light"><img src="../img/token-light-fadingin.gif" alt={this.props.NameLightColor + " Score"} /></span>
+                        <span className="token-img token-dark"><img src="../img/token-dark-fadingin.gif" alt={this.props.GameData.PlayerDark.Username + " Score"} /></span>
+                        <span className="token-img token-light"><img src="../img/token-light-fadingin.gif" alt={this.props.GameData.PlayerLight.Username + " Score"} /></span>
                         <span className="score-value score-light">{this.props.GameData.CurrScoreLight}</span>
                         <span>:</span>
                         <span className={this.props.GameData.CurrTurn === 1 ? "player-name player-light player-curr" : "player-name player-light"}>{this.props.GameData.PlayerLight.Username}</span>
