@@ -1,2 +1,2 @@
 declare module 'react.timer';
-declare module 'react-idle-timer';
+declare module 'react-audio-player';

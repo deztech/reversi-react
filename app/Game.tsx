@@ -1,6 +1,6 @@
 import React from 'react';
 import Timer from 'react.timer';
-//import IdleTimer from 'react-idle-timer';
+import ReactAudioPlayer from 'react-audio-player';
 
 import { PageKey } from './App';
 import { IPlayer } from './App';
@@ -65,6 +65,8 @@ export class Game extends React.Component<GameProps, GameState> {
                                  <button id="OverButton" type="button" className="btn btn-warning" onClick={this.props.onQuit}>Exit Game</button>
                              </div> :
                              <button id="QuitButton" type="button" className="btn btn-danger" onClick={this.props.onQuit}>Quit Game</button>;
+        
+        const AudioTag = <ReactAudioPlayer src="/misc/your-turn.mp3" autoPlay="true" key={Math.random().toString().replace('0.', '')} />;
 
         return (
             <div className="GameComponent">
@@ -98,6 +100,7 @@ export class Game extends React.Component<GameProps, GameState> {
                         {PassBtn}
                         {SwitchBtn}
                         {OverOrQuitUI}
+                        {AudioTag}
                     </div>
                 </div>
             </div>

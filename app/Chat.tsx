@@ -1,5 +1,5 @@
-//import Classnames from 'classnames';
 import React from 'react';
+import ReactAudioPlayer from 'react-audio-player';
 
 import { PageKey } from './App';
 import { IChatMsg } from './App';
@@ -43,6 +43,8 @@ export class Chat extends React.Component<ChatProps, ChatState> {
                 return <div key={_Index} className="ChatMsg"><strong>{_ChatMsg.Username}:</strong> <span>{_ChatMsg.Message}</span></div>;
             }
         });
+        
+        const AudioTag = <ReactAudioPlayer src="/misc/your-turn.mp3" autoPlay="true" key={Math.random().toString().replace('0.', '')} />;
 
         return (
             <div className="ChatComponent">
@@ -61,6 +63,7 @@ export class Chat extends React.Component<ChatProps, ChatState> {
                         <div id="messages">
                             {ChatMsgs}
                         </div>
+                        {AudioTag}
                     </div>
                 </div>
             </div>
