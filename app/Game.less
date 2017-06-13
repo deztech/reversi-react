@@ -7,9 +7,28 @@
     border: 4px solid #999;
 }
 
+.game-board-table {
+    margin: auto;
+    background-color: #6a7baf;
+    border: 4px solid #339;
+}
+
+.game-board-table td {
+    border: 1px solid #333;
+    margin: 0;
+    padding: 2px;
+}
+
 .board-row {
     margin: 0 !important;
     clear: both;
+}
+
+.board-col {
+    background-color: #6a7baf;
+    border: 1px solid #333;
+    margin: 0;
+    padding: 2px;
 }
 
 @media (min-width: 0) {
@@ -22,6 +41,10 @@
     font-weight: bold;
   }
   .score-row img {
+      max-width: 24px;
+      max-height: 24px;
+  }
+  .board-col img {
       max-width: 24px;
       max-height: 24px;
   }
@@ -42,6 +65,10 @@
   .score-row img {
       max-width: 48px;
       max-height: 48px;
+  }
+  .board-col img {
+      max-width: 64px;
+      max-height: 64px;
   }
   .game-feedback {
     font-size: 1.5em;

@@ -45,6 +45,13 @@ export class Game extends React.Component<GameProps, GameState> {
             return <div className="row board-row">{Inner}</div>;
         });
 
+        // const BoardOutput = this.props.GameData.BoardArray.map((_BoardLocation:IBoardLocation[], _X:number) => {
+        //     const Inner = _BoardLocation.map((_BoardLocation:IBoardLocation, _Y:number) => {
+        //         return <td><GameSquare onClick={this.props.onGameSquareClick} BoardLocation={_BoardLocation} CurrTurn={this.props.GameData.CurrTurn} IsMyTurn={IsMyTurn} /></td>;
+        //     });
+        //     return <tr>{Inner}</tr>;
+        // });
+
         const Feedback = this.props.GameData.IsGameOver ?
                             <div>{this.props.GameData.GameOverMessage}</div> :
                             <div>{CurrTurnUsername}&#39;s Move (#{this.props.GameData.MovesArray.length - 4 + 1}): <Timer key={(Date.now())} /></div>
@@ -89,6 +96,9 @@ export class Game extends React.Component<GameProps, GameState> {
                 </div>
                 <div className="row board-row">
                     <div className="col text-center">
+                        {/*<table className="game-board-table">
+                            {BoardOutput}
+                        </table>*/}
                         <span className="game-board text-center">
                             {BoardOutput}
                         </span>

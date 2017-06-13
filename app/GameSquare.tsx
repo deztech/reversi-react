@@ -49,8 +49,8 @@ export class GameSquare extends React.Component<GameSquareProps, GameSquareState
         //                 <img className="img-fluid" src={"/img/" + SquareImg + ".gif"} />
 
         const Output = IsValidSquare ?
-                        <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img className="img-fluid" src={"/img/" + SquareImg + ".gif"} /></a> :
-                        <img className="img-fluid" src={"/img/" + SquareImg + ".gif"} />
+                        <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img src={"/img/" + SquareImg + ".gif"} /></a> :
+                        <img src={"/img/" + SquareImg + ".gif"} />
 
         return (
             <div className={"GameSquareComponent valid-" + IsValidSquare + " valid-" + TurnColor}>
