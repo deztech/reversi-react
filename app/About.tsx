@@ -28,8 +28,9 @@ export class About extends React.Component<AboutProps, AboutState> {
                 <div className="row">
                     <div className="col">
                         <p>This Reversi game is part of an <em>Interactive Technology</em> class project led by <a href="http://www.djp3.net/" target="_blank">Professor Don J. Patterson <i className="fa fa-external-link" aria-hidden="true"></i></a> for UC Irvine's <a href="http://mhcid.ics.uci.edu/" target="_blank">Master in Human-Computer Interaction and Design <i className="fa fa-external-link" aria-hidden="true"></i></a> program.</p>
-                        <p>The project uses a custom Node.js web server to manage application state and a Bootstrap 4 JavaScript web application for the user interface.</p>
+                        <p>The project uses a custom Node.js web server to manage application state and a web application written in React &amp; Typescript for the user interface.</p>
                         <p>The aim of the project is to acquire a solid understanding of server-side and client-side web application programming as it relates to our Human-Computer Interaction and User Experience (UX) Design goals.</p>
+                        <p>My particular implementation added support for mobile device play, subtle visual highlights on all available moves to a player, allows for the standard 8x8 board as well as a simpler 6x6 board, and audible turn notications.</p>
                         <p>Sound Credit: "Your Turn" in-game notification sound from <a href="https://notificationsounds.com/message-tones/your-turn-491" target="_blank">NotificationSounds.com <i className="fa fa-external-link" aria-hidden="true"></i></a></p>
                     </div>
                 </div>
