@@ -56,22 +56,19 @@ export class Game extends React.Component<GameProps, GameState> {
                             <div>{this.props.GameData.GameOverMessage}</div> :
                             <div>{CurrTurnUsername}&#39;s Move (#{this.props.GameData.MovesArray.length - 4 + 1}): <Timer key={(Date.now())} /></div>
         
-        var SwitchBtn = <span></span>;
+        var SwchBtn = <span></span>;
         if(this.props.GameData.MovesArray.length === 4 && this.props.GameData.BoardArray.length === 6)
-            SwitchBtn = <button id="SwchButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(8); }}>Play 8x8</button>;
+            SwchBtn = <button id="SwchButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(8); }}>Play 8x8</button>;
         else if(this.props.GameData.MovesArray.length === 4 && this.props.GameData.BoardArray.length === 8)
-            SwitchBtn = <button id="SwchButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(6); }}>Play 6x6</button>;
+            SwchBtn = <button id="SwchButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(6); }}>Play 6x6</button>;
         
         const PassBtn = IsMyTurn && this.props.GameData.IsCurrTurnMustPass && this.props.GameData.IsGameOver === false?
                         <button id="PassButton" type="button" className="btn btn-warning left-button" onClick={() => { this.props.onGameSquareClick({X:-1, Y:-1, OccupiedBy:0, AnimationState:-1, IsValidForDark:false, IsValidForLight:false}, this.props.GameData.CurrTurn); }}>Pass Turn</button> :
                         "";
 
-        const OverOrQuitUI = this.props.GameData.IsGameOver ? 
-                             <div>
-                                 <button id="PlayButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(this.props.GameData.BoardArray.length); }}>New Game</button>
-                                 <button id="OverButton" type="button" className="btn btn-warning" onClick={this.props.onQuit}>Exit Game</button>
-                             </div> :
-                             <button id="QuitButton" type="button" className="btn btn-danger" onClick={this.props.onQuit}>Quit Game</button>;
+        const PlayBtn = this.props.GameData.IsGameOver ? 
+                        <button id="PlayButton" type="button" className="btn btn-success left-button" onClick={() => { this.props.onReplay(this.props.GameData.BoardArray.length); }}>New Game</button> :
+                        "";
         
         const AudioTag = <ReactAudioPlayer src="/misc/your-turn.mp3" autoPlay="true" key={Math.random().toString().replace('0.', '')} />;
 
@@ -108,8 +105,9 @@ export class Game extends React.Component<GameProps, GameState> {
                 <div className="row actions-row">
                     <div className="col text-center">
                         {PassBtn}
-                        {SwitchBtn}
-                        {OverOrQuitUI}
+                        {SwchBtn}
+                        {PlayBtn}
+                        <button id="QuitButton" type="button" className="btn btn-danger" onClick={this.props.onQuit}>Exit Game</button>
                         {AudioTag}
                     </div>
                 </div>
