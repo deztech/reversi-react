@@ -11,13 +11,7 @@ interface IGameSquareProps {
     IsMyTurn: Boolean;
 }
 
-interface IGameSquareState {
-}
-
-export class GameSquare extends React.Component<IGameSquareProps, IGameSquareState> {
-
-    state = {
-    } as IGameSquareState;
+export class GameSquare extends React.Component<IGameSquareProps, {}> {
 
     render() {
 

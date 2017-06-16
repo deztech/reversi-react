@@ -16,13 +16,7 @@ interface ILobbyProps {
     PlayerData: IPlayer[];
 }
 
-interface ILobbyState {
-}
-
-export class Lobby extends React.Component<ILobbyProps, ILobbyState> {
-
-    state = {
-    } as ILobbyState;
+export class Lobby extends React.Component<ILobbyProps, {}> {
 
     render() {
         const ActivePlayer = this.props.GetActivePlayer();

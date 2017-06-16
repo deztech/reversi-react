@@ -10,12 +10,12 @@ import { Lobby } from './Lobby';
 import { Chat } from './Chat';
 import { Game } from './Game';
 
-import { Constants } from './AppConstants';
+import { Constants, PageKey } from './AppConstants';
 
-import { PageKey, 
-         IGame, IPlayer, IBoardLocation, 
-         IChatMsg, IMove, ILobbyAction, IJoinRoom, ISendMessage, 
-         ISendMessageResponse, IServerDataResponse } from './AppInterfaces';
+// import { PageKey, 
+//          IGame, IPlayer, IBoardLocation, 
+//          IChatMsg, IMove, ILobbyAction, IJoinRoom, ISendMessage, 
+//          ISendMessageResponse, IServerDataResponse } from './AppInterfaces';
 
 import './lib/reset.less';
 import './App.less';
@@ -45,7 +45,7 @@ export class App extends React.Component<{}, IAppState> {
             console.log.apply(console, e);
         });
 
-        //Handle web socket event for join_room_response...
+        //Handle web socket event for error responses...
         this.mSocket.on('error_response', (e: IServerDataResponse): void => {
             //Logging and Error Handling...
             console.log('error_response: ' + JSON.stringify(e));
@@ -55,7 +55,7 @@ export class App extends React.Component<{}, IAppState> {
             }
         });
 
-        //Handle web socket event for player_disconnect...
+        //Handle web socket event for player or game updates (new player, player disconnect, game updates, etc)...
         this.mSocket.on('update_broadcast', (e: IServerDataResponse): void => {
             //Logging and Error Handling...
             console.log('update_broadcast: ' + JSON.stringify(e));
@@ -165,6 +165,7 @@ export class App extends React.Component<{}, IAppState> {
         }
     }
 
+    //Name Component Handler(s)...
     private handleNameSubmitEvent = (Name: string) => {
         if(Name == null || Name === '')
             Name = 'Anonymous' + Math.floor(Math.random() * 10000);

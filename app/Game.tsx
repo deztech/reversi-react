@@ -16,13 +16,7 @@ interface IGameProps {
     GameData: IGame;
 }
 
-interface IGameState {
-}
-
-export class Game extends React.Component<IGameProps, IGameState> {
-    
-    state = {
-    } as IGameState;
+export class Game extends React.Component<IGameProps, {}> {
 
     render() {
 
