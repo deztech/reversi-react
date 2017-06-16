@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "14c9879d2c2a1635ac4a"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "f022ed41200c0b194a6c"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -1030,7 +1030,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             var _ActivePlayer = _this.GetActivePlayerFromPlayerArray(e.PlayerData);
             var _CurrPageKey = _this.state.ActivePage;
             //If the ActivePlayer isn't in the Lobby, then go to the Game "page"...
-            if (_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== _AppConstants.LOBBYROOMNAME) {
+            if (_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== _AppConstants.Constants.LOBBYROOMNAME) {
                 _CurrPageKey = _AppInterfaces.PageKey.Game;
             }
             //Update State...
@@ -1054,23 +1054,14 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
                 });
             }
         };
-        //Name Component Handler(s)...
-        _this.handleNameChangeEvent = function (e) {
-            _this.setState({
-                PlayerName: e.currentTarget.value
-            });
-        };
-        _this.handleNameSubmitEvent = function (e) {
-            if (_this.state.PlayerName === '') {
-                _this.setState({
-                    PlayerName: 'Anonymous' + Math.floor(Math.random() * 10000)
-                });
-            }
-            var _JoinPayload = { RoomName: _AppConstants.LOBBYROOMNAME, Username: _this.state.PlayerName };
+        _this.handleNameSubmitEvent = function (Name) {
+            if (Name == null || Name === '') Name = 'Anonymous' + Math.floor(Math.random() * 10000);
+            var _JoinPayload = { RoomName: _AppConstants.Constants.LOBBYROOMNAME, Username: Name };
             console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
             _this.mSocket.emit('join_room', _JoinPayload);
             _this.setState({
-                ActivePage: _AppInterfaces.PageKey.Lobby
+                ActivePage: _AppInterfaces.PageKey.Lobby,
+                PlayerName: Name
             });
         };
         //Lobby Component Handler(s)...
@@ -1092,7 +1083,7 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
         };
         _this.handleGameQuit = function (e) {
             var _GameData = _this.state.GameData;
-            var _Payload = { RoomName: _AppConstants.LOBBYROOMNAME, Username: _this.state.PlayerName };
+            var _Payload = { RoomName: _AppConstants.Constants.LOBBYROOMNAME, Username: _this.state.PlayerName };
             console.log('JoinRoom: ' + JSON.stringify(_Payload));
             _this.mSocket.emit('join_room', _Payload);
             _this.setState({
@@ -1106,8 +1097,9 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
             console.log('TryMove: ' + JSON.stringify(_Payload));
             _this.mSocket.emit('try_move', _Payload);
         };
-        _this.handleChatMsgSubmitEvent = function (e) {
-            var _ChatPayload = { RoomName: _AppConstants.LOBBYROOMNAME, Username: _this.state.PlayerName, Message: e.currentTarget.value };
+        //Chat Component Handler(s)...
+        _this.handleChatMsgSubmitEvent = function (Message) {
+            var _ChatPayload = { RoomName: _AppConstants.Constants.LOBBYROOMNAME, Username: _this.state.PlayerName, Message: Message };
             console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
             _this.mSocket.emit('send_message', _ChatPayload);
         };
@@ -1176,9 +1168,9 @@ var App = exports.App = _wrapComponent('App')(function (_React$Component) {
                     case _AppInterfaces.PageKey.Rules:
                         return _react3.default.createElement(_Rules.Rules, { onNavigate: _this2.handleNavAction });
                     case _AppInterfaces.PageKey.Name:
-                        return _react3.default.createElement(_Name.Name, { onNavigate: _this2.handleNavAction, onNameChange: _this2.handleNameChangeEvent, onNameSubmit: _this2.handleNameSubmitEvent, PlayerName: _this2.state.PlayerName });
+                        return _react3.default.createElement(_Name.Name, { onNavigate: _this2.handleNavAction, onNameSubmit: _this2.handleNameSubmitEvent, PlayerName: _this2.state.PlayerName });
                     case _AppInterfaces.PageKey.Lobby:
-                        return _react3.default.createElement("div", { id: "LobbyChat" }, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onInvite: _this2.handleLobbyInvite, onUninvite: _this2.handleLobbyUninvite, onPlay: _this2.handleLobbyPlay, GetActivePlayer: _this2.GetActivePlayer, LobbyRoomName: _AppConstants.LOBBYROOMNAME, PlayerName: _this2.state.PlayerName, PlayerData: _this2.state.PlayerData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgSubmit: _this2.handleChatMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
+                        return _react3.default.createElement("div", { id: "LobbyChat" }, _react3.default.createElement(_Lobby.Lobby, { onNavigate: _this2.handleNavAction, onInvite: _this2.handleLobbyInvite, onUninvite: _this2.handleLobbyUninvite, onPlay: _this2.handleLobbyPlay, GetActivePlayer: _this2.GetActivePlayer, LobbyRoomName: _AppConstants.Constants.LOBBYROOMNAME, PlayerName: _this2.state.PlayerName, PlayerData: _this2.state.PlayerData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgSubmit: _this2.handleChatMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
                     case _AppInterfaces.PageKey.Game:
                         return _react3.default.createElement("div", { id: "GameChat" }, _react3.default.createElement(_Game.Game, { onNavigate: _this2.handleNavAction, onReplay: _this2.handleGamePlay, onQuit: _this2.handleGameQuit, onGameSquareClick: _this2.handleGameSquareClick, ActivePlayer: _this2.GetActivePlayer(), GameData: _this2.state.GameData }), _react3.default.createElement(_Chat.Chat, { onNavigate: _this2.handleNavAction, onMsgSubmit: _this2.handleChatMsgSubmitEvent, PlayerName: _this2.state.PlayerName, NewChatMsgVal: _this2.state.NewChatMsgVal, ChatMsgs: _this2.state.ChatMsgs }));
                     default:
@@ -1216,10 +1208,20 @@ var _temp = function () {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var LOBBYROOMNAME = exports.LOBBYROOMNAME = 'Lobby';
-var NAMEDARKCOLOR = exports.NAMEDARKCOLOR = 'Blue';
-var NAMELIGHTCOLOR = exports.NAMELIGHTCOLOR = 'Gold';
-var KEYENTER = exports.KEYENTER = 13;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Constants = exports.Constants = function Constants() {
+  _classCallCheck(this, Constants);
+};
+
+Constants.LOBBYROOMNAME = 'Lobby';
+Constants.KEYENTER = 13;
+// export const LOBBYROOMNAME: string = 'Lobby';
+// export const NAMEDARKCOLOR: string = 'Blue';
+// export const NAMELIGHTCOLOR: string = 'Gold';
+// export const KEYENTER: number = 13; 
+
 ;
 
 var _temp = function () {
@@ -1227,13 +1229,7 @@ var _temp = function () {
     return;
   }
 
-  __REACT_HOT_LOADER__.register(LOBBYROOMNAME, 'LOBBYROOMNAME', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/AppConstants.ts');
-
-  __REACT_HOT_LOADER__.register(NAMEDARKCOLOR, 'NAMEDARKCOLOR', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/AppConstants.ts');
-
-  __REACT_HOT_LOADER__.register(NAMELIGHTCOLOR, 'NAMELIGHTCOLOR', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/AppConstants.ts');
-
-  __REACT_HOT_LOADER__.register(KEYENTER, 'KEYENTER', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/AppConstants.ts');
+  __REACT_HOT_LOADER__.register(Constants, 'Constants', 'C:/DezTech/GoogleDriveRoot_DezTech/MHCID/Classes/285-InteractiveTechnology/reversi-react/app/AppConstants.ts');
 }();
 
 ;
@@ -1339,6 +1335,8 @@ var _reactAudioPlayer = __webpack_require__("./node_modules/react-audio-player/d
 
 var _reactAudioPlayer2 = _interopRequireDefault(_reactAudioPlayer);
 
+var _AppConstants = __webpack_require__("./app/AppConstants.ts");
+
 __webpack_require__("./app/Chat.less");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -1392,15 +1390,18 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
             });
         };
         _this.onLocalMsgSubmit = function (e) {
-            _this.props.onMsgSubmit(e);
+            _this.ExecuteSubmit();
+        };
+        _this.onLocalKeyDown = function (e) {
+            if (e.keyCode === _AppConstants.Constants.KEYENTER) {
+                _this.ExecuteSubmit();
+            }
+        };
+        _this.ExecuteSubmit = function () {
+            _this.props.onMsgSubmit(_this.state.MsgVal);
             _this.setState({
                 MsgVal: ''
             });
-        };
-        _this.onLocalKeyDown = function (e) {
-            // if(e.keyCode === app.constants.ENTER_KEY) {
-            //     this.props.onMsgSubmit(e);   <-- THIS e IS THE WRONG TYPE THO... :/
-            // }
         };
         return _this;
     }
@@ -1415,7 +1416,7 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
                 }
             });
             var AudioTag = _react3.default.createElement(_reactAudioPlayer2.default, { src: "/misc/your-turn.mp3", autoPlay: "true", key: Math.random().toString().replace('0.', '') });
-            return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-8" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.onLocalMsgChange, onKeyDown: this.onLocalKeyDown, value: this.state.MsgVal })), _react3.default.createElement("div", { className: "col-4" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.onLocalMsgSubmit, value: this.state.MsgVal }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs), AudioTag)));
+            return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-8" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.onLocalMsgChange, onKeyDown: this.onLocalKeyDown, value: this.state.MsgVal })), _react3.default.createElement("div", { className: "col-4" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.onLocalMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs), AudioTag)));
         }
     }]);
 
@@ -2122,6 +2123,8 @@ var _index6 = _interopRequireDefault(_index5);
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _AppConstants = __webpack_require__("./app/AppConstants.ts");
+
 var _AppInterfaces = __webpack_require__("./app/AppInterfaces.ts");
 
 __webpack_require__("./app/Name.less");
@@ -2169,7 +2172,28 @@ var Name = exports.Name = _wrapComponent('Name')(function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Name.__proto__ || Object.getPrototypeOf(Name)).apply(this, arguments));
 
-        _this.state = {};
+        _this.state = {
+            NameVal: ''
+        };
+        _this.onLocalNameChange = function (e) {
+            _this.setState({
+                NameVal: e.currentTarget.value
+            });
+        };
+        _this.onLocalNameSubmit = function (e) {
+            _this.ExecuteSubmit();
+        };
+        _this.onLocalKeyDown = function (e) {
+            if (e.keyCode === _AppConstants.Constants.KEYENTER) {
+                _this.ExecuteSubmit();
+            }
+        };
+        _this.ExecuteSubmit = function () {
+            _this.props.onNameSubmit(_this.state.NameVal);
+            _this.setState({
+                NameVal: ''
+            });
+        };
         return _this;
     }
 
@@ -2180,7 +2204,7 @@ var Name = exports.Name = _wrapComponent('Name')(function (_React$Component) {
 
             return _react3.default.createElement("div", { className: "NameComponent" }, _react3.default.createElement("div", { className: "row text-center" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("a", { href: "javascript:void(0)", onClick: function onClick() {
                     _this2.props.onNavigate(_AppInterfaces.PageKey.Home);
-                } }, _react3.default.createElement("img", { className: "img-fluid", src: "img/header_main.jpg", alt: "Play Reversi Online (Othello)" })), _react3.default.createElement("h1", null, "Play Now!"))), _react3.default.createElement("div", { className: "row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Your Username:"), _react3.default.createElement("input", { id: "username", className: "form-control", type: "text", placeholder: "Enter your username...", onChange: this.props.onNameChange })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary", onClick: this.props.onNameSubmit }, "Play"))), _react3.default.createElement("div", { className: "row text-center" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("a", { href: "javascript:void(0)", onClick: function onClick() {
+                } }, _react3.default.createElement("img", { className: "img-fluid", src: "img/header_main.jpg", alt: "Play Reversi Online (Othello)" })), _react3.default.createElement("h1", null, "Play Now!"))), _react3.default.createElement("div", { className: "row" }, _react3.default.createElement("div", { className: "col-9" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Your Username:"), _react3.default.createElement("input", { id: "username", className: "form-control", type: "text", placeholder: "Enter your username...", onChange: this.onLocalNameChange, onKeyDown: this.onLocalKeyDown, value: this.state.NameVal })), _react3.default.createElement("div", { className: "col-3" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary", onClick: this.onLocalNameSubmit }, "Play"))), _react3.default.createElement("div", { className: "row text-center" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("a", { href: "javascript:void(0)", onClick: function onClick() {
                     _this2.props.onNavigate(_AppInterfaces.PageKey.Home);
                 }, className: "btn btn-lg btn-secondary btn-minwidth" }, "Cancel"))));
         }

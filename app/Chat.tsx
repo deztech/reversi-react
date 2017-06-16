@@ -1,13 +1,15 @@
 import React from 'react';
 import ReactAudioPlayer from 'react-audio-player';
 
+import { Constants } from './AppConstants';
+
 import { PageKey, IChatMsg } from './AppInterfaces';
 
 import './Chat.less';
 
 interface IChatProps {
     onNavigate: (toPage: PageKey) => void;
-    onMsgSubmit: (e: React.FormEvent<HTMLButtonElement>) => void;
+    onMsgSubmit: (Message: string) => void;
     PlayerName: string;
     NewChatMsgVal: string;
     ChatMsgs: IChatMsg[];
@@ -30,16 +32,20 @@ export class Chat extends React.Component<IChatProps, IChatState> {
     }
     
     private onLocalMsgSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
-        this.props.onMsgSubmit(e);
+        this.ExecuteSubmit();
+    }
+    
+    private onLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if(e.keyCode === Constants.KEYENTER) {
+            this.ExecuteSubmit();
+        }
+    }
+
+    private ExecuteSubmit = () => {
+        this.props.onMsgSubmit(this.state.MsgVal);
         this.setState({
             MsgVal: ''
         });
-    }
-    
-    private onLocalKeyDown = (e: any) => {
-        // if(e.keyCode === app.constants.ENTER_KEY) {
-        //     this.props.onMsgSubmit(e);   <-- THIS e IS THE WRONG TYPE THO... :/
-        // }
     }
 
     render() {
@@ -60,7 +66,7 @@ export class Chat extends React.Component<IChatProps, IChatState> {
                         <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.onLocalMsgChange} onKeyDown={this.onLocalKeyDown} value={this.state.MsgVal} />
                     </div>
                     <div className="col-4">
-                        <button type="submit" className="btn btn-primary pull-right" onClick={this.onLocalMsgSubmit} value={this.state.MsgVal}>Send</button>
+                        <button type="submit" className="btn btn-primary pull-right" onClick={this.onLocalMsgSubmit}>Send</button>
                     </div>
                 </div>
                 <div className="chatmessages row">

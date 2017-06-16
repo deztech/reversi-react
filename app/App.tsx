@@ -10,7 +10,7 @@ import { Lobby } from './Lobby';
 import { Chat } from './Chat';
 import { Game } from './Game';
 
-import { LOBBYROOMNAME } from './AppConstants';
+import { Constants } from './AppConstants';
 
 import { PageKey, 
          IGame, IPlayer, IBoardLocation, 
@@ -137,7 +137,7 @@ export class App extends React.Component<{}, IAppState> {
         let _CurrPageKey = this.state.ActivePage;
 
         //If the ActivePlayer isn't in the Lobby, then go to the Game "page"...
-        if(_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== LOBBYROOMNAME) {
+        if(_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== Constants.LOBBYROOMNAME) {
             _CurrPageKey = PageKey.Game;
         }
         
@@ -165,26 +165,17 @@ export class App extends React.Component<{}, IAppState> {
         }
     }
 
-    //Name Component Handler(s)...
-    private handleNameChangeEvent = (e: React.FormEvent<HTMLInputElement>) => {
-        this.setState({
-            PlayerName: e.currentTarget.value
-        });
-    }
+    private handleNameSubmitEvent = (Name: string) => {
+        if(Name == null || Name === '')
+            Name = 'Anonymous' + Math.floor(Math.random() * 10000);
 
-    private handleNameSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
-        if (this.state.PlayerName === '') {
-            this.setState({
-                PlayerName: 'Anonymous' + Math.floor(Math.random() * 10000),
-            });
-        }
-
-        let _JoinPayload: IJoinRoom = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName };
+        let _JoinPayload: IJoinRoom = { RoomName: Constants.LOBBYROOMNAME, Username: Name };
         console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
         this.mSocket.emit('join_room', _JoinPayload);
         
         this.setState({
             ActivePage: PageKey.Lobby,
+            PlayerName: Name
         });
     }
 
@@ -213,7 +204,7 @@ export class App extends React.Component<{}, IAppState> {
 
         var _GameData = this.state.GameData;
 
-        let _Payload: IJoinRoom = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName };
+        let _Payload: IJoinRoom = { RoomName: Constants.LOBBYROOMNAME, Username: this.state.PlayerName };
         console.log('JoinRoom: ' + JSON.stringify(_Payload));
         this.mSocket.emit('join_room', _Payload);
 
@@ -230,8 +221,9 @@ export class App extends React.Component<{}, IAppState> {
         this.mSocket.emit('try_move', _Payload);
     }
 
-    private handleChatMsgSubmitEvent = (e: React.FormEvent<HTMLButtonElement>) => {
-        let _ChatPayload: ISendMessage = { RoomName: LOBBYROOMNAME, Username: this.state.PlayerName, Message: e.currentTarget.value };
+    //Chat Component Handler(s)...
+    private handleChatMsgSubmitEvent = (Message: string) => {
+        let _ChatPayload: ISendMessage = { RoomName: Constants.LOBBYROOMNAME, Username: this.state.PlayerName, Message: Message };
         console.log('ChatPayload: ' + JSON.stringify(_ChatPayload));
         this.mSocket.emit('send_message', _ChatPayload);
     }
@@ -251,7 +243,6 @@ export class App extends React.Component<{}, IAppState> {
 
                 case PageKey.Name:
                     return <Name onNavigate={this.handleNavAction} 
-                                 onNameChange={this.handleNameChangeEvent} 
                                  onNameSubmit={this.handleNameSubmitEvent} 
                                  PlayerName={this.state.PlayerName} />;
 
@@ -262,7 +253,7 @@ export class App extends React.Component<{}, IAppState> {
                                    onUninvite={this.handleLobbyUninvite}
                                    onPlay={this.handleLobbyPlay}
                                    GetActivePlayer={this.GetActivePlayer}
-                                   LobbyRoomName={LOBBYROOMNAME}
+                                   LobbyRoomName={Constants.LOBBYROOMNAME}
                                    PlayerName={this.state.PlayerName} 
                                    PlayerData={this.state.PlayerData} />
                             <Chat  onNavigate={this.handleNavAction} 
