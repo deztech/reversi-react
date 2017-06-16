@@ -1,16 +1,16 @@
 import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
+import { PageKey } from './AppInterfaces';
 
 import './Nav.less';
 
-interface NavProps {
+interface INavProps {
 	ActivePage: PageKey;
 	onNavigate: (toPage: PageKey) => void;
 }
 
-export class Nav extends React.Component<NavProps, {}> {
+export class Nav extends React.Component<INavProps, {}> {
 
 	render() {
 		const { ActivePage } = this.props;

@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactAudioPlayer from 'react-audio-player';
 
-import { PageKey } from './App';
-import { IChatMsg } from './App';
+import { PageKey, IChatMsg } from './AppInterfaces';
 
 import './Chat.less';
 
-interface ChatProps {
+interface IChatProps {
     onNavigate: (toPage: PageKey) => void;
     onMsgSubmit: (e: React.FormEvent<HTMLButtonElement>) => void;
     PlayerName: string;
@@ -14,26 +13,33 @@ interface ChatProps {
     ChatMsgs: IChatMsg[];
 }
 
-interface ChatState {
+interface IChatState {
     MsgVal: string;
 }
 
-export class Chat extends React.Component<ChatProps, ChatState> {
+export class Chat extends React.Component<IChatProps, IChatState> {
 
     state = {
         MsgVal:this.props.NewChatMsgVal
-    } as ChatState;
+    } as IChatState;
 
     private onLocalMsgChange = (e: React.FormEvent<HTMLInputElement>) => {
         this.setState({
             MsgVal: e.currentTarget.value
         });
     }
+    
     private onLocalMsgSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
         this.props.onMsgSubmit(e);
         this.setState({
             MsgVal: ''
         });
+    }
+    
+    private onLocalKeyDown = (e: any) => {
+        // if(e.keyCode === app.constants.ENTER_KEY) {
+        //     this.props.onMsgSubmit(e);   <-- THIS e IS THE WRONG TYPE THO... :/
+        // }
     }
 
     render() {
@@ -51,7 +57,7 @@ export class Chat extends React.Component<ChatProps, ChatState> {
                 <div className="newmessage row">
                     <div className="col-8">
                         <label className="col-form-label sr-only">Enter Chat Message:</label>
-                        <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.onLocalMsgChange} value={this.state.MsgVal} />
+                        <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.onLocalMsgChange} onKeyDown={this.onLocalKeyDown} value={this.state.MsgVal} />
                     </div>
                     <div className="col-4">
                         <button type="submit" className="btn btn-primary pull-right" onClick={this.onLocalMsgSubmit} value={this.state.MsgVal}>Send</button>

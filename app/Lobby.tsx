@@ -1,14 +1,11 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
-//import { IAppData } from './App';
-import { IPlayer } from './App';
-//import { IDictionary } from './App';
+import { PageKey, IPlayer } from './AppInterfaces';
 
 import './Lobby.less';
 
-interface LobbyProps {
+interface ILobbyProps {
     onNavigate: (toPage: PageKey) => void;
     onInvite: (e: React.FormEvent<HTMLButtonElement>) => void;
     onUninvite: (e: React.FormEvent<HTMLButtonElement>) => void;
@@ -19,13 +16,13 @@ interface LobbyProps {
     PlayerData: IPlayer[];
 }
 
-interface LobbyState {
+interface ILobbyState {
 }
 
-export class Lobby extends React.Component<LobbyProps, LobbyState> {
+export class Lobby extends React.Component<ILobbyProps, ILobbyState> {
 
     state = {
-    } as LobbyState;
+    } as ILobbyState;
 
     render() {
         const ActivePlayer = this.props.GetActivePlayer();

@@ -1,20 +1,20 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
+import { PageKey } from './AppInterfaces';
 
 import './Home.less';
 
-interface HomeProps {
+interface IHomeProps {
     onNavigate: (toPage: PageKey) => void;
 }
 
-interface HomeState {
+interface IHomeState {
 }
 
-export class Home extends React.Component<HomeProps, HomeState> {
+export class Home extends React.Component<IHomeProps, IHomeState> {
     state = {
-    } as HomeState;
+    } as IHomeState;
 
     render() {
         return (

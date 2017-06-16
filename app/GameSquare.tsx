@@ -1,24 +1,23 @@
 import React from 'react';
 
-//import { GameColor } from './App';
-import { IBoardLocation } from './App';
+import { IBoardLocation } from './AppInterfaces';
 
 import './GameSquare.less';
 
-interface GameSquareProps {
+interface IGameSquareProps {
     onClick: (BoardLocation: IBoardLocation, CurrTurn: number) => void;
     BoardLocation: IBoardLocation;
     CurrTurn: number;
     IsMyTurn: Boolean;
 }
 
-interface GameSquareState {
+interface IGameSquareState {
 }
 
-export class GameSquare extends React.Component<GameSquareProps, GameSquareState> {
+export class GameSquare extends React.Component<IGameSquareProps, IGameSquareState> {
 
     state = {
-    } as GameSquareState;
+    } as IGameSquareState;
 
     render() {
 

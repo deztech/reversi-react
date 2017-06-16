@@ -1,9 +1,6 @@
 import React from 'react';
 import io from 'socket.io-client';
 
-//import { IKeyedCollection } from './IKeyedCollection';
-//import { KeyedCollection } from './IKeyedCollection';
-
 import { Nav } from './Nav';
 import { Home } from './Home';
 import { About } from './About';
@@ -13,119 +10,18 @@ import { Lobby } from './Lobby';
 import { Chat } from './Chat';
 import { Game } from './Game';
 
+import { LOBBYROOMNAME } from './AppConstants';
+
+import { PageKey, 
+         IGame, IPlayer, IBoardLocation, 
+         IChatMsg, IMove, ILobbyAction, IJoinRoom, ISendMessage, 
+         ISendMessageResponse, IServerDataResponse } from './AppInterfaces';
+
 import './lib/reset.less';
 import './App.less';
 
-//Enum of "pages" within the app...
-export enum PageKey {
-	Home,
-	About,
-	Rules,
-	Name,
-	Lobby,
-    Game
-}
-
-//Defines the Player data structure...
-export interface IPlayer {
-    SocketID: string;
-    Username: string;
-    CurrRoomName: string;
-    NextRoomName: string;
-    InvitesTo: string[];
-    InvitedBy: string[];
-    AddedOn: Date;
-}
-
-//Defines the Game data structure...
-export interface IGame {
-    RoomName: string;
-    PlayerDark: IPlayer;
-    PlayerLight: IPlayer;
-    CurrScoreDark: number;
-    CurrScoreLight: number;
-    CurrTurn: number;
-    IsCurrTurnMustPass: boolean;
-    IsGameOver: boolean;
-    GameOverMessage: string;
-    NumOptionsDark: number;
-    NumOptionsLight: number;
-    BoardArray: IBoardLocation[][];
-    MovesArray: IMove[];
-    PlayerExitedUsername: string;
-    AddedOn: Date;
-    ModifiedOn: Date;
-}
-
-//Defines a single Location (square) on the Game's BoardArray...
-export interface IBoardLocation {
-    X: number;
-    Y: number;
-    OccupiedBy: number;
-    AnimationState: number;
-    IsValidForDark: Boolean;
-    IsValidForLight: Boolean;
-}
-
-export interface IMove {
-    X: number;
-    Y: number;
-    CurrTurn: number;
-}
-
-//Interface of what a chat message is...
-export interface IChatMsg {
-    Username: string;
-    Message: string;
-    AddedOn: Date;
-}
-
-//Received from Server for important data response like joining/disconnecting from rooms... (not for chat responses)
-interface IServerDataResponse {
-    IsOpSuccess: boolean;
-    ActionName: string;
-    Message: string;
-    PlayerData: IPlayer[];
-    GameData: IGame;
-}
-
-//Sent to Server when the user takes a Lobby Action...
-interface ILobbyAction {
-    ActionName: string;
-    SourceSocketID: string;
-    TargetSocketID: string;
-}
-
-//Sent to Server when the user joins a room...
-interface IJoinRoom {
-    RoomName: string;
-    Username: string;
-}
-
-//Sent to Server when the user trys to make a move...
-interface ITryMove {
-    X: number;
-    Y: number;
-    CurrTurn: number;
-}
-
-//Sent to Server when the user chats out a new message...
-interface ISendMessage {
-    RoomName: string;
-    Username: string;
-    Message: string;
-}
-
-//Received from Server when someone chats out a message...
-interface ISendMessageResponse {
-    IsOpSuccess: boolean;
-    Message: string;
-    RoomName: string;
-    Username: string;
-}
-
 //Overall application state structure...
-interface AppState {
+interface IAppState {
     ActivePage: PageKey;
     PlayerName: string;
     NewChatMsgVal: string;
@@ -134,11 +30,7 @@ interface AppState {
     GameData: IGame;
 }
 
-const LOBBYROOMNAME: string = 'Lobby';
-const NAMEDARKCOLOR: string = 'Blue';
-const NAMELIGHTCOLOR: string = 'Gold';
-
-export class App extends React.Component<{}, AppState> {
+export class App extends React.Component<{}, IAppState> {
 
     private mSocket: SocketIOClient.Socket;
 
@@ -205,7 +97,7 @@ export class App extends React.Component<{}, AppState> {
         NewChatMsgVal: '',
         ChatMsgs: [],
         PlayerData: []
-    } as AppState;
+    } as IAppState;
 
     //Get the active Player using the PlayerName from the AppState...
     public GetActivePlayer = () => {
@@ -333,7 +225,7 @@ export class App extends React.Component<{}, AppState> {
 
     //GameSquare Component Handler(s)...
     private handleGameSquareClick = (BoardLocation: IBoardLocation, CurrTurn: number) => {
-        let _Payload: ITryMove = { X: BoardLocation.X, Y: BoardLocation.Y, CurrTurn: CurrTurn };
+        let _Payload: IMove = { X: BoardLocation.X, Y: BoardLocation.Y, CurrTurn: CurrTurn };
         console.log('TryMove: ' + JSON.stringify(_Payload));
         this.mSocket.emit('try_move', _Payload);
     }

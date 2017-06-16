@@ -2,15 +2,12 @@ import React from 'react';
 import Timer from 'react.timer';
 import ReactAudioPlayer from 'react-audio-player';
 
-import { PageKey } from './App';
-import { IPlayer } from './App';
-import { IGame } from './App';
-import { IBoardLocation } from './App';
+import { PageKey, IPlayer, IGame, IBoardLocation } from './AppInterfaces';
 import { GameSquare } from './GameSquare';
 
 import './Game.less';
 
-interface GameProps {
+interface IGameProps {
     onNavigate: (toPage: PageKey) => void;
     onReplay: (BoardSize: number) => void;
     onQuit: (e: React.FormEvent<HTMLButtonElement>) => void;
@@ -19,17 +16,13 @@ interface GameProps {
     GameData: IGame;
 }
 
-interface GameState {
-    // ActivePlayerColor: number;
-    // OtherPlayer: IPlayer;
+interface IGameState {
 }
 
-export class Game extends React.Component<GameProps, GameState> {
+export class Game extends React.Component<IGameProps, IGameState> {
     
     state = {
-        // ActivePlayerColor: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? -1 : 1,
-        // OtherPlayer: this.props.ActivePlayer.Username === this.props.GameData.PlayerDark.Username ? this.props.GameData.PlayerLight : this.props.GameData.PlayerDark
-    } as GameState;
+    } as IGameState;
 
     render() {
 

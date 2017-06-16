@@ -1,20 +1,20 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
+import { PageKey } from './AppInterfaces';
 
 import './About.less';
 
-interface AboutProps {
+interface IAboutProps {
     onNavigate: (toPage: PageKey) => void;
 }
 
-interface AboutState {
+interface IAboutState {
 }
 
-export class About extends React.Component<AboutProps, AboutState> {
+export class About extends React.Component<IAboutProps, IAboutState> {
     state = {
-    } as AboutState;
+    } as IAboutState;
 
     render() {
         return (

@@ -1,24 +1,24 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
+import { PageKey } from './AppInterfaces';
 
 import './Name.less';
 
-interface NameProps {
+interface INameProps {
     onNavigate: (toPage: PageKey) => void;
     onNameChange: (e: React.FormEvent<HTMLInputElement>) => void;
     onNameSubmit: (e: React.FormEvent<HTMLButtonElement>) => void;
     PlayerName: string;
 }
 
-interface NameState {
+interface INameState {
 }
 
-export class Name extends React.Component<NameProps, NameState> {
+export class Name extends React.Component<INameProps, INameState> {
     
     state = {
-    } as NameState;
+    } as INameState;
 
     render() {
         return (

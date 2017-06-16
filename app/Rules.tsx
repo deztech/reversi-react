@@ -1,20 +1,20 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './App';
+import { PageKey } from './AppInterfaces';
 
 import './Rules.less';
 
-interface RulesProps {
+interface IRulesProps {
     onNavigate: (toPage: PageKey) => void;
 }
 
-interface RulesState {
+interface IRulesState {
 }
 
-export class Rules extends React.Component<RulesProps, RulesState> {
+export class Rules extends React.Component<IRulesProps, IRulesState> {
     state = {
-    } as RulesState;
+    } as IRulesState;
 
     render() {
         return (
@@ -27,7 +27,7 @@ export class Rules extends React.Component<RulesProps, RulesState> {
                 </div>
                 <div className="row">
                     <div className="col">
-                        <p>Reversi is the game also known under its commercial name of <em>Othello</em> where two players take turns playing light and dark colored game pieces on an 8 by 8 game board until one player cannot make any additional valid moves at which point the player with the most game pieces of their color is the winner.</p>
+                        <p>Reversi is the game also known under its commercial name of <em>Othello</em> where two players take turns playing light and dark colored game pieces on an 8 by 8 game board until both players cannot make any additional valid moves at which point the player with the most game pieces of their color is the winner.</p>
                         <p>Please see the <a href="https://en.wikipedia.org/wiki/Reversi" target="_blank">Reversi page on WikiPedia <i className="fa fa-external-link" aria-hidden="true"></i></a> for full game rules if you're unfamiliar with them.</p>
                     </div>
                 </div>
