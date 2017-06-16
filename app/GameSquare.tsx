@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { IBoardLocation } from './AppInterfaces';
-
 import './GameSquare.less';
 
 interface IGameSquareProps {

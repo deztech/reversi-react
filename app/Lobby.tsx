@@ -1,7 +1,7 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey, IPlayer } from './AppInterfaces';
+import { PageKey } from './AppConstants';
 
 import './Lobby.less';
 

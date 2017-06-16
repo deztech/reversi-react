@@ -1,7 +1,7 @@
 //import Classnames from 'classnames';
 import React from 'react';
 
-import { PageKey } from './AppInterfaces';
+import { PageKey } from './AppConstants';
 
 import './Rules.less';
 

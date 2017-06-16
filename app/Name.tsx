@@ -1,9 +1,6 @@
-//import Classnames from 'classnames';
 import React from 'react';
 
-import { Constants } from './AppConstants';
-
-import { PageKey } from './AppInterfaces';
+import { Constants, PageKey } from './AppConstants';
 
 import './Name.less';
 

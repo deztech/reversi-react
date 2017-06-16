@@ -1,9 +1,7 @@
 import React from 'react';
 import ReactAudioPlayer from 'react-audio-player';
 
-import { Constants } from './AppConstants';
-
-import { PageKey, IChatMsg } from './AppInterfaces';
+import { Constants, PageKey } from './AppConstants';
 
 import './Chat.less';
 

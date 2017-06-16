@@ -1,8 +1,8 @@
-//declare module 'react.timer'{};
-//declare module 'react-audio-player'{};
+declare module 'react.timer';
+declare module 'react-audio-player';
 
 //Defines the Game data structure...
-export interface IGame {
+declare interface IGame {
     RoomName: string;
     PlayerDark: IPlayer;
     PlayerLight: IPlayer;
@@ -21,8 +21,8 @@ export interface IGame {
     ModifiedOn: Date;
 }
 
-//Defines the Player data structure...
-export interface IPlayer {
+// Defines the Player data structure...
+declare interface IPlayer {
     SocketID: string;
     Username: string;
     CurrRoomName: string;
@@ -33,7 +33,7 @@ export interface IPlayer {
 }
 
 //Defines a single Location (square) on the Game's BoardArray...
-export interface IBoardLocation {
+declare interface IBoardLocation {
     X: number;
     Y: number;
     OccupiedBy: number;
@@ -43,40 +43,40 @@ export interface IBoardLocation {
 }
 
 //Interface of what a chat message is...
-export interface IChatMsg {
+declare interface IChatMsg {
     Username: string;
     Message: string;
     AddedOn: Date;
 }
 
-export interface IMove {
+declare interface IMove {
     X: number;
     Y: number;
     CurrTurn: number;
 }
 
 //Sent to Server when the user takes a Lobby Action...
-export interface ILobbyAction {
+declare interface ILobbyAction {
     ActionName: string;
     SourceSocketID: string;
     TargetSocketID: string;
 }
 
 //Sent to Server when the user joins a room...
-export interface IJoinRoom {
+declare interface IJoinRoom {
     RoomName: string;
     Username: string;
 }
 
 //Sent to Server when the user chats out a new message...
-export interface ISendMessage {
+declare interface ISendMessage {
     RoomName: string;
     Username: string;
     Message: string;
 }
 
 //Received from Server when someone chats out a message...
-export interface ISendMessageResponse {
+declare interface ISendMessageResponse {
     IsOpSuccess: boolean;
     Message: string;
     RoomName: string;
@@ -84,7 +84,7 @@ export interface ISendMessageResponse {
 }
 
 //Received from Server for important data response like joining/disconnecting from rooms... (not for chat responses)
-export interface IServerDataResponse {
+declare interface IServerDataResponse {
     IsOpSuccess: boolean;
     ActionName: string;
     Message: string;

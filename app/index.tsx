@@ -1,3 +1,4 @@
+/// <reference path="../typings/index.d.ts"/>
 import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';

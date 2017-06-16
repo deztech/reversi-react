@@ -20,7 +20,7 @@ import { Constants, PageKey } from './AppConstants';
 import './lib/reset.less';
 import './App.less';
 
-//Overall application state structure...
+/** Overall application state structure... */
 interface IAppState {
     ActivePage: PageKey;
     PlayerName: string;
@@ -69,12 +69,12 @@ export class App extends React.Component<{}, IAppState> {
             if (e.IsOpSuccess) {
                 //Update ChatMsgs...
                 let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
-                if(e.Message && e.Message !== '') {
-                    _NewChatMsgs.push({ Username:e.Username, Message:e.Message, AddedOn:new Date() });
+                if (e.Message && e.Message !== '') {
+                    _NewChatMsgs.push({ Username: e.Username, Message: e.Message, AddedOn: new Date() });
                 }
 
                 //Update State...
-                if(e.Username === this.state.PlayerName) {
+                if (e.Username === this.state.PlayerName) {
                     //Update NewChatMsgVal to '' if the message received is from the current/active player...
                     this.setState({
                         NewChatMsgVal: '',
@@ -105,16 +105,16 @@ export class App extends React.Component<{}, IAppState> {
     }
 
     //Get the active Player using the PlayerName from the AppState...
-    public GetActivePlayerFromPlayerArray = (_PlayerData:IPlayer[]) => {
+    public GetActivePlayerFromPlayerArray = (_PlayerData: IPlayer[]) => {
         return _PlayerData.find(_Player => _Player.Username === this.state.PlayerName);
     }
 
     //Get Player by SocketID...
-    public GetPlayerBySocketID = (_SocketID:string) => {
+    public GetPlayerBySocketID = (_SocketID: string) => {
         return this.state.PlayerData.find(_Player => _Player.SocketID === _SocketID);
     }
 
-    private EmitLobbyAction = (_LobbyAction:ILobbyAction) => {
+    private EmitLobbyAction = (_LobbyAction: ILobbyAction) => {
         console.log(_LobbyAction.ActionName + ' ' + _LobbyAction.SourceSocketID + '->' + _LobbyAction.TargetSocketID);
         this.mSocket.emit('lobby_action', _LobbyAction);
     }
@@ -128,8 +128,8 @@ export class App extends React.Component<{}, IAppState> {
 
         //Update ChatMsgs...
         let _NewChatMsgs: IChatMsg[] = this.state.ChatMsgs.slice();
-        if(e.Message && e.Message !== '') {
-            _NewChatMsgs.push({ Username:'SYSTEM', Message:e.Message, AddedOn:new Date() });
+        if (e.Message && e.Message !== '') {
+            _NewChatMsgs.push({ Username: 'SYSTEM', Message: e.Message, AddedOn: new Date() });
         }
 
         //Get the Active Player and Current Active PageKey...
@@ -137,10 +137,10 @@ export class App extends React.Component<{}, IAppState> {
         let _CurrPageKey = this.state.ActivePage;
 
         //If the ActivePlayer isn't in the Lobby, then go to the Game "page"...
-        if(_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== Constants.LOBBYROOMNAME) {
+        if (_ActivePlayer.CurrRoomName && _ActivePlayer.CurrRoomName !== Constants.LOBBYROOMNAME) {
             _CurrPageKey = PageKey.Game;
         }
-        
+
         //Update State...
         this.setState({
             ActivePage: _CurrPageKey,
@@ -149,13 +149,13 @@ export class App extends React.Component<{}, IAppState> {
             GameData: e.GameData
         });
 
-        if(_ActivePlayer.NextRoomName !== '') {
+        if (_ActivePlayer.NextRoomName !== '') {
             let _JoinPayload: IJoinRoom = { RoomName: _ActivePlayer.NextRoomName, Username: this.state.PlayerName };
             console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
             this.mSocket.emit('join_room', _JoinPayload);
         }
     }
-    
+
     //Nav Component Handler(s)...
     private handleNavAction = (pageKey: PageKey) => {
         if (this.state.ActivePage !== pageKey) {
@@ -167,13 +167,13 @@ export class App extends React.Component<{}, IAppState> {
 
     //Name Component Handler(s)...
     private handleNameSubmitEvent = (Name: string) => {
-        if(Name == null || Name === '')
+        if (Name == null || Name === '')
             Name = 'Anonymous' + Math.floor(Math.random() * 10000);
 
         let _JoinPayload: IJoinRoom = { RoomName: Constants.LOBBYROOMNAME, Username: Name };
         console.log('JoinPayload: ' + JSON.stringify(_JoinPayload));
         this.mSocket.emit('join_room', _JoinPayload);
-        
+
         this.setState({
             ActivePage: PageKey.Lobby,
             PlayerName: Name
@@ -182,17 +182,17 @@ export class App extends React.Component<{}, IAppState> {
 
     //Lobby Component Handler(s)...
     private handleLobbyInvite = (e: React.FormEvent<HTMLButtonElement>) => {
-        let _Payload: ILobbyAction = { ActionName:'invite', SourceSocketID:this.GetActivePlayer().SocketID, TargetSocketID:e.currentTarget.value };
+        let _Payload: ILobbyAction = { ActionName: 'invite', SourceSocketID: this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
         this.EmitLobbyAction(_Payload);
     }
 
     private handleLobbyUninvite = (e: React.FormEvent<HTMLButtonElement>) => {
-        let _Payload: ILobbyAction = { ActionName:'uninvite', SourceSocketID:this.GetActivePlayer().SocketID, TargetSocketID:e.currentTarget.value };
+        let _Payload: ILobbyAction = { ActionName: 'uninvite', SourceSocketID: this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
         this.EmitLobbyAction(_Payload);
     }
 
     private handleLobbyPlay = (e: React.FormEvent<HTMLButtonElement>) => {
-        let _Payload: ILobbyAction = { ActionName:'play', SourceSocketID:this.GetActivePlayer().SocketID, TargetSocketID:e.currentTarget.value };
+        let _Payload: ILobbyAction = { ActionName: 'play', SourceSocketID: this.GetActivePlayer().SocketID, TargetSocketID: e.currentTarget.value };
         this.EmitLobbyAction(_Payload);
     }
 
@@ -230,7 +230,7 @@ export class App extends React.Component<{}, IAppState> {
     }
 
     //Main App render() method...
-	render() {
+    render() {
         const { ActivePage } = this.state;
 
         //Get the correct "Page" Component to return for the App's main render() method.
@@ -243,41 +243,41 @@ export class App extends React.Component<{}, IAppState> {
                     return <Rules onNavigate={this.handleNavAction} />;
 
                 case PageKey.Name:
-                    return <Name onNavigate={this.handleNavAction} 
-                                 onNameSubmit={this.handleNameSubmitEvent} 
-                                 PlayerName={this.state.PlayerName} />;
+                    return <Name onNavigate={this.handleNavAction}
+                        onNameSubmit={this.handleNameSubmitEvent}
+                        PlayerName={this.state.PlayerName} />;
 
                 case PageKey.Lobby:
                     return <div id="LobbyChat">
-                            <Lobby onNavigate={this.handleNavAction} 
-                                   onInvite={this.handleLobbyInvite} 
-                                   onUninvite={this.handleLobbyUninvite}
-                                   onPlay={this.handleLobbyPlay}
-                                   GetActivePlayer={this.GetActivePlayer}
-                                   LobbyRoomName={Constants.LOBBYROOMNAME}
-                                   PlayerName={this.state.PlayerName} 
-                                   PlayerData={this.state.PlayerData} />
-                            <Chat  onNavigate={this.handleNavAction} 
-                                   onMsgSubmit={this.handleChatMsgSubmitEvent} 
-                                   PlayerName={this.state.PlayerName} 
-                                   NewChatMsgVal={this.state.NewChatMsgVal} 
-                                   ChatMsgs={this.state.ChatMsgs} />
-                           </div>;
+                        <Lobby onNavigate={this.handleNavAction}
+                            onInvite={this.handleLobbyInvite}
+                            onUninvite={this.handleLobbyUninvite}
+                            onPlay={this.handleLobbyPlay}
+                            GetActivePlayer={this.GetActivePlayer}
+                            LobbyRoomName={Constants.LOBBYROOMNAME}
+                            PlayerName={this.state.PlayerName}
+                            PlayerData={this.state.PlayerData} />
+                        <Chat onNavigate={this.handleNavAction}
+                            onMsgSubmit={this.handleChatMsgSubmitEvent}
+                            PlayerName={this.state.PlayerName}
+                            NewChatMsgVal={this.state.NewChatMsgVal}
+                            ChatMsgs={this.state.ChatMsgs} />
+                    </div>;
 
                 case PageKey.Game:
                     return <div id="GameChat">
-                            <Game  onNavigate={this.handleNavAction} 
-                                   onReplay={this.handleGamePlay}
-                                   onQuit={this.handleGameQuit}
-                                   onGameSquareClick={this.handleGameSquareClick}
-                                   ActivePlayer={this.GetActivePlayer()} 
-                                   GameData={this.state.GameData} />
-                            <Chat  onNavigate={this.handleNavAction} 
-                                   onMsgSubmit={this.handleChatMsgSubmitEvent} 
-                                   PlayerName={this.state.PlayerName} 
-                                   NewChatMsgVal={this.state.NewChatMsgVal} 
-                                   ChatMsgs={this.state.ChatMsgs} />
-                           </div>;
+                        <Game onNavigate={this.handleNavAction}
+                            onReplay={this.handleGamePlay}
+                            onQuit={this.handleGameQuit}
+                            onGameSquareClick={this.handleGameSquareClick}
+                            ActivePlayer={this.GetActivePlayer()}
+                            GameData={this.state.GameData} />
+                        <Chat onNavigate={this.handleNavAction}
+                            onMsgSubmit={this.handleChatMsgSubmitEvent}
+                            PlayerName={this.state.PlayerName}
+                            NewChatMsgVal={this.state.NewChatMsgVal}
+                            ChatMsgs={this.state.ChatMsgs} />
+                    </div>;
 
                 default:
                     return <Home onNavigate={this.handleNavAction} />;
@@ -305,5 +305,5 @@ export class App extends React.Component<{}, IAppState> {
                 </footer>
             </div>
         );
-	}
+    }
 }

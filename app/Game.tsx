@@ -2,7 +2,7 @@ import React from 'react';
 import Timer from 'react.timer';
 import ReactAudioPlayer from 'react-audio-player';
 
-import { PageKey, IPlayer, IGame, IBoardLocation } from './AppInterfaces';
+import { PageKey } from './AppConstants';
 import { GameSquare } from './GameSquare';
 
 import './Game.less';
