@@ -43,10 +43,6 @@ export class GameSquare extends React.Component<IGameSquareProps, IGameSquareSta
                               ((this.props.CurrTurn === -1 && this.props.BoardLocation.IsValidForDark) || 
                                (this.props.CurrTurn === 1 && this.props.BoardLocation.IsValidForLight));
         
-        // const Output = IsValidSquare ?
-        //                 <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img className="img-fluid" src={"/img/" + SquareImg + ".gif"} /><img className="img-fluid token-hover" src="/img/token-hover.gif" /></a> :
-        //                 <img className="img-fluid" src={"/img/" + SquareImg + ".gif"} />
-
         const Output = IsValidSquare ?
                         <a href="javascript:void(0)" onClick={() => { this.props.onClick(this.props.BoardLocation, this.props.CurrTurn); }}><img src={"/img/" + SquareImg + ".gif"} /></a> :
                         <img src={"/img/" + SquareImg + ".gif"} />

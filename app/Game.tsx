@@ -46,8 +46,8 @@ export class Game extends React.Component<IGameProps, IGameState> {
         // });
 
         const Feedback = this.props.GameData.IsGameOver ?
-                            <div>{this.props.GameData.GameOverMessage}</div> :
-                            <div>{CurrTurnUsername}&#39;s Move (#{this.props.GameData.MovesArray.length - 4 + 1}): <Timer key={(Date.now())} /></div>
+                            <div>{this.props.GameData.GameMessage}</div> :
+                            <div>{this.props.GameData.GameMessage}: <Timer key={(Date.now())} /></div>
         
         var SwchBtn = <span></span>;
         if(this.props.GameData.MovesArray.length === 4 && this.props.GameData.BoardArray.length === 6)

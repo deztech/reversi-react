@@ -18,7 +18,7 @@ export interface IGame {
     CurrTurn: number;
     IsCurrTurnMustPass: boolean;
     IsGameOver: boolean;
-    GameOverMessage: string;
+    GameMessage: string;
     NumOptionsDark: number;
     NumOptionsLight: number;
     BoardArray: IBoardLocation[][];

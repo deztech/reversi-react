@@ -40,8 +40,6 @@ var _mJsonFile = require('jsonfile');
 
 const BOARDSIZE = 8;
 const LOBBYROOMNAME = 'Lobby';
-// const PLAYERDATA = 'PLAYERDATA';
-// const ROOMDATA = 'ROOMDATA';
 const SAVEINTERVALMS = 1000;            //In Milliseconds
 const SAVEFILENAME = "serverdata.json"
 var _mIsDataDirty = false;
@@ -73,7 +71,7 @@ _mData.Games => Game[]
             CurrTurn (number; -1=Dark & 1=Light)
             IsCurrTurnMustPass (boolean)
             IsGameOver (boolean)
-            GameOverMessage (string)
+            GameMessage (string)
             NumOptionsDark (number; the number of valid move options for Dark)
             NumOptionsLight (number; the number of valid move options for Light)
             BoardArray (object[][]; object is of 'type' BoardLocation), 
@@ -106,15 +104,6 @@ setInterval(function(){
         });
     }
 }, SAVEINTERVALMS);
-
-var _mTOKENENUM = Object.freeze({ EMPTY:                'token-empty.gif', 
-                                  EMPTYtoDARK:          'token-empty-fading-into-dark.gif', 
-                                  EMPTYtoLIGHT:         'token-empty-fading-into-light.gif', 
-                                  DARK:                 'token-dark-static.gif', 
-                                  DARKfromLIGHT:        'token-light-flipping-to-dark.gif', 
-                                  LIGHT:                'token-light-static.gif', 
-                                  LIGHTfromDARK:        'token-dark-flipping-to-light.gif', 
-                                  ERROR:                'token-error.gif' });
 
 //Function to create a dynamic, multi-dimensional array (from: https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript/966938#966938)...
 function CreateArray(length) {
@@ -252,7 +241,7 @@ function GetNewGame(_NewRoomForGame, _PlayerA, _PlayerB, _BoardSize) {
     _Game.NumOptionsLight = -1;
     _Game.IsCurrTurnMustPass = false;
     _Game.IsGameOver = false;
-    _Game.GameOverMessage = ''
+    _Game.GameMessage = ''
 
     //Init the MovesArray...
     _Game.MovesArray = [];
@@ -356,11 +345,24 @@ function ExecuteGameMove(_Game, _X, _Y, _IsInitMove) {
 
     if(_Game.IsGameOver) {
         if(_Game.CurrScoreDark > _Game.CurrScoreLight)
-            _Game.GameOverMessage = _Game.PlayerDark.Username + ' Wins ' + _Game.CurrScoreDark + ' - ' + _Game.CurrScoreLight + '!';
+            _Game.GameMessage = _Game.PlayerDark.Username + ' Wins ' + _Game.CurrScoreDark + ' - ' + _Game.CurrScoreLight + '!';
         else if(_Game.CurrScoreLight > _Game.CurrScoreDark)
-            _Game.GameOverMessage = _Game.PlayerLight.Username + ' Wins ' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + '!';
+            _Game.GameMessage = _Game.PlayerLight.Username + ' Wins ' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + '!';
         else
-            _Game.GameOverMessage = 'Game Tied! (' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + ')';
+            _Game.GameMessage = 'Game Tied! (' + _Game.CurrScoreLight + ' - ' + _Game.CurrScoreDark + ')';
+    }
+    else if(_Game.IsCurrTurnMustPass && _Game.NumOptionsDark === 0) {
+        _Game.GameMessage = _Game.PlayerDark.Username + ' Must Pass';
+    }
+    else if(_Game.IsCurrTurnMustPass && _Game.NumOptionsLight === 0) {
+        _Game.GameMessage = _Game.PlayerLight.Username + ' Must Pass';
+    }
+    else {
+        var _GameMessage = '\'s Move (#' + (_Game.MovesArray.length - 4 + 1) + ')';
+        if(_Game.CurrTurn === -1)
+            _Game.GameMessage = _Game.PlayerDark.Username + _GameMessage;
+        else
+            _Game.GameMessage = _Game.PlayerLight.Username + _GameMessage;
     }
 
     //Set the Server Data as dirty...
@@ -838,8 +840,8 @@ _mIO.sockets.on('connection', function (_Socket) {
         ExecuteGameMove(_Game, _Payload.X, _Payload.Y);
 
         //Add a message when the game is over to help make that super obvious too...
-        if(_Game.IsGameOver && _Game.GameOverMessage)
-            _Message = _Game.GameOverMessage;
+        if(_Game.IsGameOver && _Game.GameMessage)
+            _Message = _Game.GameMessage;
 
         //Respond...
         var _SuccessData = {
