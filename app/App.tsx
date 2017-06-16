@@ -295,10 +295,9 @@ export class App extends React.Component<{}, IAppState> {
                     <div className="row text-center">
                         <div className="col">
                             <span>
-                                By <a href="http://aaronsoto.com" target="_blank">Aaron Soto <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
-                                For <a href="http://mhcid.ics.uci.edu/" target="_blank">UC Irvine's MHCID Program <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
-                                <a href="https://github.com/deztech/reversi-react" target="_blank">GitHub.com/deztech/reversi-react <i className="fa fa-external-link" aria-hidden="true"></i></a><br />
-                                <a href="/serverdata.json" target="_blank">View Server Data (JSON) <i className="fa fa-external-link" aria-hidden="true"></i></a>
+                                By <a href="http://aaronsoto.com" target="_blank">Aaron Soto</a><br />
+                                For <a href="http://mhcid.ics.uci.edu/" target="_blank">UC Irvine's MHCID Program</a><br />
+                                <a href="https://github.com/deztech/reversi-react" target="_blank">GitHub Repo</a> | <a href="https://youtu.be/Ija5idXFoGQ" target="_blank">YouTube Demo</a> | <a href="/serverdata.json" target="_blank">Server Data (JSON)</a>
                             </span>
                         </div>
                     </div>
