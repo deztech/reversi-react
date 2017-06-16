@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "f022ed41200c0b194a6c"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "0b4ce62d4bf53142b8ba"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -1381,6 +1381,7 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (Chat.__proto__ || Object.getPrototypeOf(Chat)).apply(this, arguments));
 
+        _this.mAllowAudio = true;
         _this.state = {
             MsgVal: _this.props.NewChatMsgVal
         };
@@ -1393,11 +1394,13 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
             _this.ExecuteSubmit();
         };
         _this.onLocalKeyDown = function (e) {
+            _this.mAllowAudio = false;
             if (e.keyCode === _AppConstants.Constants.KEYENTER) {
                 _this.ExecuteSubmit();
             }
         };
         _this.ExecuteSubmit = function () {
+            _this.mAllowAudio = true;
             _this.props.onMsgSubmit(_this.state.MsgVal);
             _this.setState({
                 MsgVal: ''
@@ -1415,7 +1418,7 @@ var Chat = exports.Chat = _wrapComponent('Chat')(function (_React$Component) {
                     return _react3.default.createElement("div", { key: _Index, className: "ChatMsg" }, _react3.default.createElement("strong", null, _ChatMsg.Username, ":"), " ", _react3.default.createElement("span", null, _ChatMsg.Message));
                 }
             });
-            var AudioTag = _react3.default.createElement(_reactAudioPlayer2.default, { src: "/misc/your-turn.mp3", autoPlay: "true", key: Math.random().toString().replace('0.', '') });
+            var AudioTag = this.mAllowAudio ? _react3.default.createElement(_reactAudioPlayer2.default, { src: "/misc/your-turn.mp3", autoPlay: "true", key: Math.random().toString().replace('0.', '') }) : "";
             return _react3.default.createElement("div", { className: "ChatComponent" }, _react3.default.createElement("div", { className: "newmessage row" }, _react3.default.createElement("div", { className: "col-8" }, _react3.default.createElement("label", { className: "col-form-label sr-only" }, "Enter Chat Message:"), _react3.default.createElement("input", { id: "NewMessage", className: "form-control", type: "text", placeholder: "Enter chat message...", onChange: this.onLocalMsgChange, onKeyDown: this.onLocalKeyDown, value: this.state.MsgVal })), _react3.default.createElement("div", { className: "col-4" }, _react3.default.createElement("button", { type: "submit", className: "btn btn-primary pull-right", onClick: this.onLocalMsgSubmit }, "Send"))), _react3.default.createElement("div", { className: "chatmessages row" }, _react3.default.createElement("div", { className: "col" }, _react3.default.createElement("h4", null, "Messages..."), _react3.default.createElement("div", { id: "messages" }, ChatMsgs), AudioTag)));
         }
     }]);

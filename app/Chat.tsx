@@ -21,8 +21,10 @@ interface IChatState {
 
 export class Chat extends React.Component<IChatProps, IChatState> {
 
+    private mAllowAudio: boolean = true;
+
     state = {
-        MsgVal:this.props.NewChatMsgVal
+        MsgVal: this.props.NewChatMsgVal
     } as IChatState;
 
     private onLocalMsgChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -36,12 +38,14 @@ export class Chat extends React.Component<IChatProps, IChatState> {
     }
     
     private onLocalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        this.mAllowAudio = false;
         if(e.keyCode === Constants.KEYENTER) {
             this.ExecuteSubmit();
         }
     }
 
     private ExecuteSubmit = () => {
+        this.mAllowAudio = true;
         this.props.onMsgSubmit(this.state.MsgVal);
         this.setState({
             MsgVal: ''
@@ -56,7 +60,9 @@ export class Chat extends React.Component<IChatProps, IChatState> {
             }
         });
         
-        const AudioTag = <ReactAudioPlayer src="/misc/your-turn.mp3" autoPlay="true" key={Math.random().toString().replace('0.', '')} />;
+        const AudioTag = this.mAllowAudio ?
+                         <ReactAudioPlayer src="/misc/your-turn.mp3" autoPlay="true" key={Math.random().toString().replace('0.', '')} /> :
+                         "";
 
         return (
             <div className="ChatComponent">
