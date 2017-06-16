@@ -285,7 +285,7 @@ export class App extends React.Component<{}, IAppState> {
         };
 
         return (
-            <div className="App container add-row-spacing">
+            <div className="container App App-addrowspacing">
                 <header>
                     <Nav ActivePage={ActivePage} onNavigate={this.handleNavAction} />
                 </header>

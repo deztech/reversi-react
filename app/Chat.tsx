@@ -63,11 +63,11 @@ export class Chat extends React.Component<IChatProps, IChatState> {
                          "";
 
         return (
-            <div className="ChatComponent">
-                <div className="newmessage row">
+            <div className="Chat">
+                <div className="row Chat-newmessagerow">
                     <div className="col-8">
                         <label className="col-form-label sr-only">Enter Chat Message:</label>
-                        <input id="NewMessage" className="form-control" type="text" placeholder="Enter chat message..." onChange={this.onLocalMsgChange} onKeyDown={this.onLocalKeyDown} value={this.state.MsgVal} />
+                        <input className="form-control Chat-newmessageinput" type="text" placeholder="Enter chat message..." onChange={this.onLocalMsgChange} onKeyDown={this.onLocalKeyDown} value={this.state.MsgVal} />
                     </div>
                     <div className="col-4">
                         <button type="submit" className="btn btn-primary pull-right" onClick={this.onLocalMsgSubmit}>Send</button>

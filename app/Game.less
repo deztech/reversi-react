@@ -1,30 +1,34 @@
-.score-row .player-curr {
+.Game-rowwithoutmargin {
+    margin: 0 !important;
+}
+
+.Game-scorerow .Game-playercurr {
     border-bottom: 2px solid #006;
 }
 
-.game-board {
+.Game-board {
     display: inline-block;
     border: 4px solid #999;
 }
 
-.game-board-table {
+.Game-board-table {
     margin: auto;
     background-color: #6a7baf;
     border: 4px solid #339;
 }
 
-.game-board-table td {
+.Game-board-table td {
     border: 1px solid #333;
     margin: 0;
     padding: 2px;
 }
 
-.board-row {
+.Game-boardrow {
     margin: 0 !important;
     clear: both;
 }
 
-.board-col {
+.Game-boardcol {
     background-color: #6a7baf;
     border: 1px solid #333;
     margin: 0;
@@ -32,54 +36,54 @@
 }
 
 @media (min-width: 0) {
-  .score-row .score-value {
+  .Game-scorerow .score-value {
     font-size: 1.2em;
   }
-  .score-row span {
+  .Game-scorerow span {
     margin: auto;
     padding: 2px 3px;
     font-weight: bold;
   }
-  .score-row img {
+  .Game-scorerow img {
       max-width: 24px;
       max-height: 24px;
   }
-  .board-col img {
+  .Game-boardcol img {
       max-width: 24px;
       max-height: 24px;
   }
-  .game-feedback {
+  .Game-feedback {
     font-size: 1.1em;
     font-weight: bold;
   }
 }
 @media (min-width: 768px) {
-  .score-row .score-value {
+  .Game-scorerow .score-value {
     font-size: 1.5em;
   }
-  .score-row span {
+  .Game-scorerow span {
     margin: auto;
     padding: 2px 5px;
     font-weight: bold;
   }
-  .score-row img {
+  .Game-scorerow img {
       max-width: 48px;
       max-height: 48px;
   }
-  .board-col img {
+  .Game-boardcol img {
       max-width: 64px;
       max-height: 64px;
   }
-  .game-feedback {
+  .Game-feedback {
     font-size: 1.5em;
     font-weight: bold;
   }
 }
 
-.actions-row button {
+.Game-actionsrow button {
     min-width: 120px;
 }
 
-.actions-row .left-button {
+.Game-actionsrow .Game-leftbutton {
     margin-right: 20px;
 }

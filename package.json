@@ -6,8 +6,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "prod": "webpack --env.prod 1",
-    "start": "webpack --env.prod 0",
-    "oldstart": "webpack-dev-server"
+    "start": "webpack-dev-server"
   },
   "repository": {
     "type": "git",

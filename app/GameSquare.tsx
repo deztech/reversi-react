@@ -40,7 +40,7 @@ export class GameSquare extends React.Component<IGameSquareProps, {}> {
                         <img src={"/img/" + SquareImg + ".gif"} />
 
         return (
-            <div className={"GameSquareComponent valid-" + IsValidSquare + " valid-" + TurnColor}>
+            <div className={"GameSquare GameSquare-valid-" + IsValidSquare + " GameSquare-valid-" + TurnColor}>
                 {Output}
             </div>
         );
